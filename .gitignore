@@ -1,0 +1,19 @@
+# 忽略所有文件
+*
+
+# 取消忽略目录（要写）
+!*/
+
+# 取消忽略特定文件类型
+!**/*.md
+!**/*.js
+!**/*.html
+!**/*.css
+!**/*.json
+!**/*.ico
+!**/.gitignore
+
+package-lock.json
+dist/**
+node_modules/**
+temp.md
