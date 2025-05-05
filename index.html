@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TaskTree 测试</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f0f0f0;
+      font-family: Arial;
+    }
+    .task-box {
+      width: 300px;
+      min-height: 150px;
+      background: #4CAF50;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .editable-text {
+      background: rgba(255,255,255,0.2);
+      padding: 8px;
+      border-radius: 4px;
+      min-height: 20px;
+      cursor: text;
+    }
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    button {
+      background: white;
+      color: #4CAF50;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="task-box">
+    <!-- 可编辑文本 -->
+    <div 
+      class="editable-text" 
+      contenteditable="true"
+      id="editableText"
+    >点击编辑这段文字</div>
+    
+    <!-- 计数器 -->
+    <div class="counter">
+      <button id="counterBtn">点击计数</button>
+      <span id="counterDisplay">0</span>
+    </div>
+  </div>
+
+  <script>
+    // 计数器功能
+    let count = 0;
+    const counterBtn = document.getElementById('counterBtn');
+    const counterDisplay = document.getElementById('counterDisplay');
+
+    counterBtn.addEventListener('click', () => {
+      count++;
+      counterDisplay.textContent = count;
+    });
+
+    // 可编辑文本的保存功能（可选）
+    const editableText = document.getElementById('editableText');
+    editableText.addEventListener('blur', () => {
+      console.log('当前文本内容:', editableText.textContent);
+      // 这里可以添加保存到本地存储的逻辑
+      // localStorage.setItem('savedText', editableText.textContent);
+    });
+
+    // 初始化时加载保存的文本（可选）
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedText = localStorage.getItem('savedText');
+      if (savedText) editableText.textContent = savedText;
+    });
+  </script>
+</body>
+</html>
