@@ -1,25 +1,26 @@
+<!-- src\App.vue -->
 <template>
-    <div id="app">
-      <TaskBox />
-    </div>
-  </template>
-  
-  <script>
-  import TaskBox from './components/TaskBox.vue'
-  
-  export default {
-    name: 'App',
-    components: {
-      TaskBox
-    }
+  <div id="app">
+    <TaskTree />
+  </div>
+</template>
+
+<script>
+import TaskTree from './components/TaskTree.vue'
+
+export default {
+  name: 'App',
+  components: {
+    TaskTree
   }
-  </script>
-  
-  <style>
-  body {
-    margin: 0;
-    padding: 20px;
-    background: #f0f0f0;
-    font-family: Arial;
-  }
-  </style>
+}
+</script>
+
+<style>
+body {
+  margin: 0;
+  padding: 20px;
+  background: #fff8e1; /* 很浅的叶黄色 */
+  font-family: Arial;
+}
+</style>
