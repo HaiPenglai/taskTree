@@ -1,16 +1,16 @@
 
-export function getFormattedDate() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1; // 月份从0开始
-    const day = today.getDate();
+export function getFormattedDate(timestamp = Date.now()) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // 月份从0开始，所以要加1
+    const day = date.getDate();
     return `${year}-${month}-${day}`;
 }
 
 
-export function getFormattedTime() {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+export function getFormattedTime(timestamp = Date.now()) {
+    const date = new Date(timestamp);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 }

@@ -1,7 +1,7 @@
-<!-- src/components/TaskTree.vue -->
+<!-- src/components/TaskBox.vue -->
 <template>
-  <div class="task-tree-container">
-    <div class="sidebar">
+  <div class="task-box">
+    <div class="sidebar-container">
       <TaskSidebarNode
         v-for="(node, index) in pendingNodes"
         :key="node.id"
@@ -10,7 +10,8 @@
         @locate-node="scrollToNode"
       />
     </div>
-    <div class="task-tree">
+    <div class="task-tree-container">
+      <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
       <TaskTreeNode
         v-for="node in nodes"
         :key="node.id"
@@ -26,13 +27,15 @@
 <script>
 import TaskTreeNode from "./TaskTreeNode.vue";
 import TaskSidebarNode from "./TaskSidebarNode.vue";
+import TaskProgressBar from "./TaskProgressBar.vue";
 import { getFormattedDate, getFormattedTime } from "../utils/dateTimeUtils";
 
 export default {
-  name: "TaskTree",
+  name: "TaskBox",
   components: {
     TaskTreeNode,
     TaskSidebarNode,
+    TaskProgressBar,
   },
   data() {
     const rootId = Date.now();
@@ -42,8 +45,9 @@ export default {
       text: ``,
       estimatedTime: 60 * 6,
       remainingTime: 60 * 6 * 60,
-      completed: 0,
+      startTime: 0 ,
       elapsedTime: 0,
+      completed: 0,
       timeStamp: getFormattedDate(),
       children: [],
     };
@@ -70,10 +74,11 @@ export default {
         text: ``,
         estimatedTime: 5,
         remainingTime: 5 * 60,
-        completed: 0,
+        startTime: 0,
         elapsedTime: 0,
-        children: [],
+        completed: 0,
         timeStamp: getFormattedTime(),
+        children: [],
       };
 
       const parentNode = this.nodeMap[parentId];
@@ -152,13 +157,13 @@ export default {
 </script>
 
 <style scoped>
-.task-tree-container {
+.task-box {
   display: flex;
   gap: 20px;
   height: 100%;
 }
 
-.sidebar {
+.sidebar-container {
   width: 220px;
   background-color: white;
   border-right: 2px solid #1aa3a5;
@@ -166,11 +171,11 @@ export default {
   max-height: 100vh;
 }
 
-.task-tree {
+.task-tree-container {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 5px;
   overflow-y: auto;
   max-height: 100vh;
 }

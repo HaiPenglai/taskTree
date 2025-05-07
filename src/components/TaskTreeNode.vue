@@ -85,15 +85,6 @@ export default {
     node: {
       type: Object,
       required: true,
-      default: () => ({
-        id: null,
-        text: "",
-        estimatedTime: 5,
-        remainingTime: 5 * 60,
-        elapsedTime: 0,
-        startTime: null,
-        completed: 0,
-      }),
     },
   },
   data() {
@@ -119,15 +110,15 @@ export default {
         this.node.completed = 1;
       } else {
         this.timerRunning = true;
-        this.startTime = Date.now();
+        this.node.startTime = Date.now();
 
         this.timerInterval = setInterval(() => {
-          this.elapsedTime = Math.floor(
-            (Date.now() - this.startTime) / 1000
+          this.node.elapsedTime = Math.floor(
+            (Date.now() - this.node.startTime) / 1000
           );
           this.node.remainingTime = Math.max(
             0,
-            this.node.estimatedTime * 60 - this.elapsedTime
+            this.node.estimatedTime * 60 - this.node.elapsedTime
           );
 
           if (this.node.remainingTime <= 0) {

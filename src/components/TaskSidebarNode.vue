@@ -39,7 +39,7 @@ export default {
   background-color: #bfeafe;
   border: none;
   border-radius: 4px;
-  color: #525252; /* 深灰色文字 */
+  color: #626262; /* 深灰色文字 */
   font-weight: 350;
   text-align: left;
   font-size: 14px;
@@ -57,11 +57,11 @@ export default {
 }
 
 .task-sidebar-node:hover {
-  background-color: #81d4fa; /* 悬停时稍深 */
+  background-color: #81d4fa;
 }
 
 .task-sidebar-node.active {
-  background-color: #4fc3f7; /* 点击/激活时更深 */
+  background-color: #4fc3f7;
   color: white;
 }
 </style>
