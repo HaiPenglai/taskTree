@@ -19,7 +19,7 @@ export default {
 <style>
 body {
   margin: 0;
-  padding: 20px;
+  padding: 0;
   background: #fff8e1; /* 很浅的叶黄色 */
   font-family: Arial;
 }

@@ -1,25 +1,38 @@
-<!-- src\components\TaskTree.vue -->
+<!-- src/components/TaskTree.vue -->
 <template>
-  <div class="task-tree">
-    <TaskTreeNode
-      v-for="node in nodes"
-      :key="node.id"
-      :node="node"
-      @add-child="addChild"
-      @delete-node="deleteNode"
-      @move-node="moveNode"
-    />
+  <div class="task-tree-container">
+    <div class="sidebar">
+      <TaskSidebarNode
+        v-for="(node, index) in pendingNodes"
+        :key="node.id"
+        :node="node"
+        :index="index + 1"
+        @locate-node="scrollToNode"
+      />
+    </div>
+    <div class="task-tree">
+      <TaskTreeNode
+        v-for="node in nodes"
+        :key="node.id"
+        :node="node"
+        @add-child="addChild"
+        @delete-node="deleteNode"
+        @move-node="moveNode"
+      />
+    </div>
   </div>
 </template>
-  
-  <script>
+
+<script>
 import TaskTreeNode from "./TaskTreeNode.vue";
+import TaskSidebarNode from "./TaskSidebarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../utils/dateTimeUtils";
 
 export default {
   name: "TaskTree",
   components: {
     TaskTreeNode,
+    TaskSidebarNode,
   },
   data() {
     const rootId = Date.now();
@@ -30,7 +43,7 @@ export default {
       estimatedTime: 60 * 6,
       remainingTime: 60 * 6 * 60,
       completed: 0,
-      actualTime: 0,
+      elapsedTime: 0,
       timeStamp: getFormattedDate(),
       children: [],
     };
@@ -39,6 +52,14 @@ export default {
       nodes: [rootNode],
       nodeMap: { [rootId]: rootNode },
     };
+  },
+  computed: {
+    pendingNodes() {
+      // 获取所有未完成节点并按estimatedTime排序
+      return Object.values(this.nodeMap)
+        .filter((node) => node.completed === 0)
+        .sort((a, b) => a.estimatedTime - b.estimatedTime);
+    },
   },
   methods: {
     addChild(parentId) {
@@ -50,7 +71,7 @@ export default {
         estimatedTime: 5,
         remainingTime: 5 * 60,
         completed: 0,
-        actualTime: 0,
+        elapsedTime: 0,
         children: [],
         timeStamp: getFormattedTime(),
       };
@@ -115,15 +136,43 @@ export default {
         siblings[currentIndex],
       ];
     },
+
+    scrollToNode(nodeId) {
+      const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
+      if (nodeElement) {
+        nodeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        nodeElement.classList.add("highlight");
+        setTimeout(() => {
+          nodeElement.classList.remove("highlight");
+        }, 2000);
+      }
+    },
   },
 };
 </script>
-  
-  <style scoped>
+
+<style scoped>
+.task-tree-container {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: white;
+  border-right: 2px solid #1aa3a5;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
 .task-tree {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;
+  max-height: 100vh;
 }
 </style>
-  
+

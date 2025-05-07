@@ -1,6 +1,6 @@
 <!-- src\components\TaskTreeNode.vue -->
 <template>
-  <div class="task-tree-node">
+  <div class="task-tree-node" :data-node-id="node.id">
     <div
       class="node-content"
       :class="{
@@ -33,7 +33,7 @@
             @click.stop="toggleTimer"
             :disabled="node.completed != 0"
           >
-            {{ node.completed == 1 ? "完成" : node.completed == 0 ? "开始" : "失败" }}
+            {{ (node.completed == 1 || timerRunning == true) ? "完成" : node.completed == 0 ? "开始" : "失败" }}
           </button>
           <div class="move-buttons">
             <button class="triangle-up" @click="moveUp"></button>
@@ -90,8 +90,9 @@ export default {
         text: "",
         estimatedTime: 5,
         remainingTime: 5 * 60,
+        elapsedTime: 0,
+        startTime: null,
         completed: 0,
-        actualTime: 0,
       }),
     },
   },
@@ -100,7 +101,6 @@ export default {
       editing: false,
       timerRunning: false,
       timerInterval: null,
-      startTime: null,
     };
   },
   methods: {
@@ -117,25 +117,23 @@ export default {
         clearInterval(this.timerInterval);
         this.timerRunning = false;
         this.node.completed = 1;
-        this.node.actualTime = Math.floor((Date.now() - this.startTime) / 1000);
       } else {
         this.timerRunning = true;
         this.startTime = Date.now();
 
         this.timerInterval = setInterval(() => {
-          const elapsedSeconds = Math.floor(
+          this.elapsedTime = Math.floor(
             (Date.now() - this.startTime) / 1000
           );
           this.node.remainingTime = Math.max(
             0,
-            this.node.estimatedTime * 60 - elapsedSeconds
+            this.node.estimatedTime * 60 - this.elapsedTime
           );
 
           if (this.node.remainingTime <= 0) {
             clearInterval(this.timerInterval);
             this.timerRunning = false;
             this.node.completed = -1;
-            this.node.actualTime = elapsedSeconds;
             this.node.remainingTime = 0;
           }
         }, 1000);
@@ -336,8 +334,8 @@ export default {
   top: -10px;
   width: 20px;
   height: 100%;
-  border-left: 2px solid #999;
-  border-bottom: 1px solid #999;
+  border-left: 2px solid #59b96e;
+  border-bottom: 1px solid #59b96e;
   border-bottom-left-radius: 8px;
 }
 
