@@ -1,28 +1,31 @@
 <!-- src/components/TaskBox.vue -->
 <template>
-  <div class="task-box">
-    <div class="sidebar-container">
-      <TaskSidebarNode
-        v-for="(node, index) in pendingNodes"
-        :key="node.id"
-        :node="node"
-        :index="index + 1"
-        @locate-node="scrollToNode"
-      />
-    </div>
-    <div class="task-tree-container">
-      <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
-      <TaskTreeNode
-        v-for="node in nodes"
-        :key="node.id"
-        :node="node"
-        @add-child="addChild"
-        @delete-node="deleteNode"
-        @move-node="moveNode"
-      />
+  <div class="task-container">
+    <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
+    <div class="content-wrapper">
+      <div class="sidebar-container">
+        <TaskSidebarNode
+          v-for="(node, index) in pendingNodes"
+          :key="node.id"
+          :node="node"
+          :index="index + 1"
+          @locate-node="scrollToNode"
+        />
+      </div>
+      <div class="task-tree-container">
+        <TaskTreeNode
+          v-for="node in nodes"
+          :key="node.id"
+          :node="node"
+          @add-child="addChild"
+          @delete-node="deleteNode"
+          @move-node="moveNode"
+        />
+      </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import TaskTreeNode from "./TaskTreeNode.vue";
@@ -45,8 +48,8 @@ export default {
       text: ``,
       estimatedTime: 90,
       remainingTime: 90 * 60,
-      startTime: Date.now(),
-      elapsedTime: 2400,
+      startTime: 0,
+      elapsedTime: 0,
       completed: 0,
       timeStamp: getFormattedDate(),
       children: [],
@@ -152,7 +155,7 @@ export default {
         nodeElement.classList.add("highlight");
         setTimeout(() => {
           nodeElement.classList.remove("highlight");
-        }, 3000);
+        }, 5000);
       }
     },
   },
@@ -160,10 +163,17 @@ export default {
 </script>
 
 <style scoped>
-.task-box {
+.task-container {
   display: flex;
-  gap: 20px;
-  height: 100%;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
 .sidebar-container {
@@ -171,7 +181,6 @@ export default {
   background-color: white;
   border-right: 2px solid #1aa3a5;
   overflow-y: auto;
-  max-height: 100vh;
 }
 
 .task-tree-container {
@@ -180,7 +189,7 @@ export default {
   flex-direction: column;
   gap: 5px;
   overflow-y: auto;
-  max-height: 100vh;
+  padding: 5px;
 }
 </style>
 

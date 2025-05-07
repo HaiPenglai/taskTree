@@ -20,7 +20,9 @@ export default {
 body {
   margin: 0;
   padding: 0;
-  background: #fff8e1; /* 很浅的叶黄色 */
+  background: #fff8e1;
   font-family: Arial;
+  height: 100vh;
+  overflow: hidden;
 }
 </style>

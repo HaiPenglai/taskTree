@@ -107,6 +107,7 @@ export default {
   background-color: white;
   border-radius: 8px;
   box-shadow: inset 0 0 3px rgba(90, 209, 248, 0.3);
+  border-bottom: 1px solid #8cd7fe;
 }
 
 .task-segment {

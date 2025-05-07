@@ -162,7 +162,7 @@ export default {
 }
 
 .highlight {
-  animation: pulse 1.5s ease infinite;
+  animation: pulse 5s ease infinite;
 }
 
 @keyframes pulse {
