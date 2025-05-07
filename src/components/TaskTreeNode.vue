@@ -1,12 +1,13 @@
 <!-- src\components\TaskTreeNode.vue -->
 <template>
-  <div class="task-tree-node" :data-node-id="node.id">
+  <div class="task-tree-node">
     <div
       class="node-content"
       :class="{
         'completed-success': node.completed === 1,
         'completed-failure': node.completed === -1,
       }"
+      :data-node-id="node.id"
     >
       <button class="delete-button" @click.stop="$emit('delete-node', node.id)">
         <span class="delete-icon">×</span>
@@ -158,6 +159,16 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.highlight {
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
 }
 
 .node-content {

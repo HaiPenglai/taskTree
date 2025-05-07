@@ -43,9 +43,9 @@ export default {
       id: rootId,
       parentId: null,
       text: ``,
-      estimatedTime: 60 * 6,
-      remainingTime: 60 * 6 * 60,
-      startTime: 0 ,
+      estimatedTime: 90,
+      remainingTime: 90 * 60,
+      startTime: 0,
       elapsedTime: 0,
       completed: 0,
       timeStamp: getFormattedDate(),
@@ -145,11 +145,14 @@ export default {
     scrollToNode(nodeId) {
       const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
       if (nodeElement) {
+        document.querySelectorAll(".highlight").forEach((el) => {
+          el.classList.remove("highlight");
+        });
         nodeElement.scrollIntoView({ behavior: "smooth", block: "center" });
         nodeElement.classList.add("highlight");
         setTimeout(() => {
           nodeElement.classList.remove("highlight");
-        }, 2000);
+        }, 3000);
       }
     },
   },
@@ -164,7 +167,7 @@ export default {
 }
 
 .sidebar-container {
-  width: 220px;
+  width: 250px;
   background-color: white;
   border-right: 2px solid #1aa3a5;
   overflow-y: auto;

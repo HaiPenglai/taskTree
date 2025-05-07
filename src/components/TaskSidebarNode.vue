@@ -5,7 +5,7 @@
     @click.stop="$emit('locate-node', node.id)"
     :class="{ active: isActive }"
   >
-    <span class="node-index">{{ index }}.</span>
+    <div class="index-badge">{{ index }}</div>
     {{ node.text || "未命名" }}
   </button>
 </template>
@@ -32,15 +32,15 @@ export default {
   
   <style scoped>
 .task-sidebar-node {
-  display: block;
+  position: relative;
+  padding: 10px 10px 10px 34px;
+  margin: 0 0 4px;
+  border-radius: 6px 0 0 6px;
   width: 100%;
-  padding: 10px 8px;
-  margin: 0px 0 4px 0;
   background-color: #bfeafe;
   border: none;
-  border-radius: 4px;
-  color: #626262; /* 深灰色文字 */
-  font-weight: 350;
+  color: #626262;
+  font-weight: 300;
   text-align: left;
   font-size: 14px;
   cursor: pointer;
@@ -50,18 +50,26 @@ export default {
   text-overflow: ellipsis;
 }
 
-.node-index {
+.index-badge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  background: #63b5ec;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
-  flex-shrink: 0;
+  border-radius: 4px 0 0 4px; /* 左端圆角 */
 }
 
 .task-sidebar-node:hover {
   background-color: #81d4fa;
 }
 
-.task-sidebar-node.active {
-  background-color: #4fc3f7;
-  color: white;
+.task-sidebar-node:hover .index-badge {
+  background-color: #378fc5;
 }
 </style>
