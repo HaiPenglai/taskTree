@@ -39,8 +39,8 @@ export default {
   width: 100%;
   background-color: #bfeafe;
   border: none;
-  color: #626262;
-  font-weight: 300;
+  color: #424242;
+  font-weight: 320;
   text-align: left;
   font-size: 14px;
   cursor: pointer;

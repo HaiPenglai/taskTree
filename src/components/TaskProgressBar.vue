@@ -1,11 +1,6 @@
 <!-- src/components/TaskProgressBar.vue -->
 <template>
   <div class="progress-bar-container">
-    <div class="time-indicators">
-      <span v-for="hour in 24" :key="hour" class="time-indicator">
-        {{ hour - 1 }}
-      </span>
-    </div>
     <div class="progress-bar">
       <div
         v-for="task in activeTasks"
@@ -106,33 +101,11 @@ export default {
   margin-bottom: 0;
 }
 
-.time-indicators {
-  display: flex;
-  justify-content: space-between;
-  font-size: 6px;
-  color: #666;
-  margin-bottom: 0;
-}
-
-.time-indicator {
-  flex: 1;
-  text-align: center;
-}
-
 .progress-bar {
   position: relative;
   height: 20px;
   background-color: white;
-  clip-path: polygon(
-    0 10px,        
-    10px 0,        
-    calc(100% - 10px) 0,  
-    100% 10px,     
-    100% calc(100% - 10px), 
-    calc(100% - 10px) 100%, 
-    10px 100%,     
-    0 calc(100% - 10px)
-  );
+  border-radius: 8px;
   box-shadow: inset 0 0 3px rgba(90, 209, 248, 0.3);
 }
 
@@ -146,7 +119,7 @@ export default {
 
 .task-segment:hover {
   opacity: 0.8;
-  transform: scaleY(1.1);
+  transform: scale(1.1);
 }
 
 .task-label {
