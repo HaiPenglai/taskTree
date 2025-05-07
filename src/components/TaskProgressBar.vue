@@ -78,7 +78,7 @@ export default {
 
     getTaskTooltip(task) {
       const start = getFormattedTime(task.startTime);
-      const end = getFormattedTime(task.startTime + task.elapsedTime);
+      const end = getFormattedTime(task.startTime + task.elapsedTime * 1000); //输入毫秒格式
       return `${
         task.text || "未命名"
       }\n${start} - ${end}\n已进行: ${Math.floor(task.elapsedTime / 60)}分钟`;
