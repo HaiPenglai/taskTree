@@ -1,66 +1,89 @@
 <!-- src\components\TaskTreeNode.vue -->
 <template>
   <div class="task-tree-node">
-    <div
-      class="node-content"
-      :class="{
-        'completed-success': node.completed === 1,
-        'completed-failure': node.completed === -1,
-      }"
-      :data-node-id="node.id"
-    >
-      <button class="delete-button" @click.stop="$emit('delete-node', node.id)">
-        <span class="delete-icon">×</span>
-      </button>
-      <div class="node-main">
-        <div class="toolbar">
-          <div class="time-stamp">
-            {{ node.timeStamp }}
-          </div>
-          <input
-            v-model.number="node.estimatedTime"
-            type="number"
-            min="1"
-            class="time-input"
-            placeholder="5"
-            @change="updateRemainingTime"
-            :disabled="node.completed != 0"
-          />
-          <div class="time-display">
-            {{ formatTime(node.remainingTime) }}
-          </div>
-          <button
-            class="action-button start-button"
-            @click.stop="toggleTimer"
-            :disabled="node.completed != 0"
-          >
-            {{ (node.completed == 1 || timerRunning == true) ? "完成" : node.completed == 0 ? "开始" : "失败" }}
-          </button>
-          <div class="move-buttons">
-            <button class="triangle-up" @click="moveUp"></button>
-            <button class="triangle-down" @click="moveDown"></button>
-          </div>
-        </div>
-        <textarea
-          v-model="node.text"
-          ref="textarea"
-          class="node-text"
-          :placeholder="'输入任务内容'"
-          @focus="editing = true"
-          @blur="editing = false"
-          @input="autoResize"
-          rows="1"
-          style="resize: none; overflow: hidden"
-          :disabled="node.completed != 0"
-        ></textarea>
-      </div>
-      <button
-        class="action-button add-button"
-        @click.stop="addChild"
-        :disabled="node.completed != 0"
+    <div class="node-self">
+      <div
+        class="node-content"
+        :class="{
+          'completed-success': node.completed === 1,
+          'completed-failure': node.completed === -1,
+        }"
+        :data-node-id="node.id"
       >
-        +
-      </button>
+        <button
+          class="delete-button"
+          @click.stop="$emit('delete-node', node.id)"
+        >
+          <span class="delete-icon">×</span>
+        </button>
+        <div class="node-main">
+          <div class="toolbar">
+            <div class="time-stamp">
+              {{ node.timeStamp }}
+            </div>
+            <input
+              v-model.number="node.estimatedTime"
+              type="number"
+              min="1"
+              class="time-input"
+              placeholder="5"
+              @change="updateRemainingTime"
+              :disabled="node.completed != 0"
+            />
+            <div class="time-display">
+              {{ formatTime(node.remainingTime) }}
+            </div>
+            <button
+              class="action-button start-button"
+              @click.stop="toggleTimer"
+              :disabled="node.completed != 0"
+            >
+              {{
+                node.completed == 1 || timerRunning == true
+                  ? "完成"
+                  : node.completed == 0
+                  ? "开始"
+                  : "失败"
+              }}
+            </button>
+            <button
+              class="action-button comment-button"
+              @click.stop="toggleComment"
+            >
+              批注
+            </button>
+            <div class="move-buttons">
+              <button class="triangle-up" @click="moveUp"></button>
+              <button class="triangle-down" @click="moveDown"></button>
+            </div>
+          </div>
+          <textarea
+            v-model="node.text"
+            ref="textarea"
+            class="node-text"
+            :placeholder="'输入任务内容'"
+            @focus="editing = true"
+            @blur="editing = false"
+            @input="autoResize"
+            rows="1"
+            style="resize: none; overflow: hidden"
+            :disabled="node.completed != 0"
+          ></textarea>
+        </div>
+        <button
+          class="action-button add-button"
+          @click.stop="addChild"
+          :disabled="node.completed != 0"
+        >
+          +
+        </button>
+      </div>
+      <div class="comment-container">
+        <CommentNode
+          v-model:comment="node.comment"
+          :show-comment="showComment"
+        />
+      </div>
     </div>
 
     <div class="children" v-if="node.children && node.children.length > 0">
@@ -80,8 +103,13 @@
 </template>
 
 <script>
+import CommentNode from "./CommentNode.vue";
+
 export default {
   name: "TaskTreeNode",
+  components: {
+    CommentNode,
+  },
   props: {
     node: {
       type: Object,
@@ -93,6 +121,7 @@ export default {
       editing: false,
       timerRunning: false,
       timerInterval: null,
+      showComment: false,
     };
   },
   methods: {
@@ -139,6 +168,9 @@ export default {
       const secs = seconds % 60;
       return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
     },
+    toggleComment() {
+      this.showComment = !this.showComment;
+    },
     moveUp() {
       this.$emit("move-node", { nodeId: this.node.id, direction: -1 });
     },
@@ -166,9 +198,19 @@ export default {
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+.node-self {
+  display: flex;
 }
 
 .node-content {
@@ -180,6 +222,7 @@ export default {
   width: fit-content;
   position: relative;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .node-content.completed-success {
@@ -189,11 +232,6 @@ export default {
 .node-content.completed-failure {
   background-color: #a0e858;
   opacity: 0.8;
-}
-
-.node-content {
-  background-color: #a8e6a8;
-  transition: background-color 0.3s ease;
 }
 
 .node-main {
@@ -278,6 +316,21 @@ export default {
 
 .start-button:hover:not(:disabled) {
   background: #3e8e41;
+}
+
+.comment-container{
+  max-width: 200px;
+  margin-top: 5px;
+  margin-left: 0;
+}
+
+.comment-button {
+  background: #4db6ac;
+  color: white;
+}
+
+.comment-button:hover:not(:disabled) {
+  background: #26a69a;
 }
 
 .move-buttons {
