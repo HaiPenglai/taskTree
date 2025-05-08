@@ -121,8 +121,13 @@ export default {
       editing: false,
       timerRunning: false,
       timerInterval: null,
-      showComment: false,
+      showComment: this.node.comment != "",
     };
+  },
+  mounted(){
+    this.$nextTick(() => {
+        this.autoResize();
+      });
   },
   methods: {
     autoResize() {
@@ -318,8 +323,8 @@ export default {
   background: #3e8e41;
 }
 
-.comment-container{
-  max-width: 200px;
+.comment-container {
+  max-width: 300px;
   margin-top: 5px;
   margin-left: 0;
 }

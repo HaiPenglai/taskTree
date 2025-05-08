@@ -45,12 +45,15 @@ TaskTree/
 ├── dist/...
 ├── src/  
 │   ├── components/  
-│   │   ├── TaskSidebarNode.vue  
+│   │   ├── TaskTreeNode.vue  
 │   │   └── ...
 │   ├── utils/  
 │   │   └── ...
 │   ├── App.vue
 │   └── main.js
+├── server
+│   ├── taskTreeAPI.js
+│   └──...
 ├── .gitignore  
 ├── main.js  
 ├── package.json  

@@ -1,6 +1,15 @@
 <!-- src/components/TaskTree.vue -->
 <template>
   <div class="task-container">
+    <div v-if="loadingState == 0" class="loading-overlay">
+      <div class="loading-spinner"></div>
+      Loading...
+    </div>
+
+    <div v-if="loadError" class="error-message">
+      {{ loadError }}
+    </div>
+
     <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
     <div class="content-wrapper">
       <div class="sidebar-container">
@@ -57,23 +66,86 @@ export default {
     return {
       nodes: [rootNode],
       nodeMap: { [rootId]: rootNode },
+      userId: 1,
+      loadingState: 0,
+      loadError: null,
+      saveTimer: null,
     };
   },
   computed: {
     pendingNodes() {
-      // 获取所有未完成节点并按estimatedTime排序
       return Object.values(this.nodeMap)
         .filter((node) => node.completed === 0)
         .sort((a, b) => a.estimatedTime - b.estimatedTime);
     },
     runningNodes() {
-      // 获取所有正在运行的节点并按剩余时间排序
       return Object.values(this.nodeMap)
         .filter((node) => node.startTime > 0 && node.completed === 0)
         .sort((a, b) => a.remainingTime - b.remainingTime);
     },
   },
+  async created() {
+    await this.loadTaskTree();
+    this.saveTimer = setInterval(() => {
+      this.saveTaskTree();
+    }, 5000);
+  },
+  beforeUnmount() {
+    if (this.saveTimer) {
+      clearInterval(this.saveTimer);
+      this.saveTimer = null;
+    }
+    this.saveTaskTree();
+  },
   methods: {
+    async loadTaskTree() {
+      try {
+        const today = getFormattedDate();
+        const response = await this.$axios.get(
+          `/api/task-tree/${this.userId}/${today}`
+        );
+        this.nodes = response.data.nodes;
+        this.buildNodeMap();
+        this.loadingState = 1;
+      } catch (error) {
+        this.loadError = "加载任务树失败，将使用默认数据";
+        this.createDefaultTree();
+        this.loadingState = -1;
+      }
+    },
+    async saveTaskTree() {
+      if (this.loadingState != 1)return ;
+      try {
+        const today = getFormattedDate();
+        await this.$axios.post(`/api/task-tree/${this.userId}/${today}`, {
+          nodes: this.nodes,
+        });
+        this.loadError = null;
+      } catch (error) {
+        console.error("Failed to save task tree:", error);
+        this.loadError = "保存任务树失败，请检查网络连接";
+      }
+    },
+    createDefaultTree() {
+      const rootId = Date.now();
+      const rootNode = this.createNode(1);
+      this.nodes = [rootNode];
+      this.nodeMap = { [rootId]: rootNode };
+    },
+    buildNodeMap() {
+      const map = {};
+      const buildMap = (nodes) => {
+        nodes.forEach((node) => {
+          map[node.id] = node;
+          if (node.children && node.children.length > 0) {
+            buildMap(node.children);
+          }
+        });
+      };
+      buildMap(this.nodes);
+      this.nodeMap = map;
+    },
+
     createNode(isRoot, parentId = null) {
       const nodeId = Date.now();
       return {
@@ -157,7 +229,7 @@ export default {
       const removeFromMap = (node) => {
         node.children.forEach((child) => removeFromMap(child));
         delete this.nodeMap[node.id];
-        this.$forceUpdate(); 
+        this.$forceUpdate();
       };
       removeFromMap(nodeToDelete);
     },
@@ -190,7 +262,6 @@ export default {
         siblings[currentIndex],
       ];
     },
-
     scrollToNode(nodeId) {
       const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
       if (nodeElement) {
