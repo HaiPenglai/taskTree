@@ -22,6 +22,14 @@
           @move-node="moveNode"
         />
       </div>
+      <div class="navbar-container">
+        <TaskNavbarNode
+          v-for="node in runningNodes"
+          :key="node.id"
+          :node="node"
+          @locate-node="scrollToNode"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -31,6 +39,7 @@
 import TaskTreeNode from "./TaskTreeNode.vue";
 import TaskSidebarNode from "./TaskSidebarNode.vue";
 import TaskProgressBar from "./TaskProgressBar.vue";
+import TaskNavbarNode from "./TaskNavbarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../utils/dateTimeUtils";
 
 export default {
@@ -39,6 +48,7 @@ export default {
     TaskTreeNode,
     TaskSidebarNode,
     TaskProgressBar,
+    TaskNavbarNode
   },
   data() {
     const rootId = Date.now();
@@ -66,6 +76,12 @@ export default {
       return Object.values(this.nodeMap)
         .filter((node) => node.completed === 0)
         .sort((a, b) => a.estimatedTime - b.estimatedTime);
+    },
+    runningNodes() {
+      // 获取所有正在运行的节点并按剩余时间排序
+      return Object.values(this.nodeMap)
+        .filter(node => node.startTime > 0 && node.completed === 0)
+        .sort((a, b) => a.remainingTime - b.remainingTime);
     },
   },
   methods: {
@@ -166,7 +182,7 @@ export default {
 .task-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  max-height: 100vh;
   overflow: hidden;
 }
 
@@ -179,7 +195,7 @@ export default {
 .sidebar-container {
   width: 250px;
   background-color: white;
-  border-right: 2px solid #1aa3a5;
+  border-right: 2px solid #3481ce;
   overflow-y: auto;
 }
 
@@ -190,6 +206,13 @@ export default {
   gap: 5px;
   overflow-y: auto;
   padding: 5px;
+}
+
+.navbar-container {
+  width: 250px;
+  background-color: white;
+  border-left: 2px solid #4db6ac; /* 青色边框 */
+  overflow-y: auto;
 }
 </style>
 
