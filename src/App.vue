@@ -1,17 +1,17 @@
 <!-- src\App.vue -->
 <template>
   <div id="app">
-    <TaskBox />
+    <TaskTree />
   </div>
 </template>
 
 <script>
-import TaskBox from './components/TaskBox.vue'
+import TaskTree from './components/TaskTree.vue'
 
 export default {
   name: 'App',
   components: {
-    TaskBox
+    TaskTree
   }
 }
 </script>

@@ -1,4 +1,4 @@
-<!-- src/components/TaskBox.vue -->
+<!-- src/components/TaskTree.vue -->
 <template>
   <div class="task-container">
     <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
@@ -43,7 +43,7 @@ import TaskNavbarNode from "./TaskNavbarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../utils/dateTimeUtils";
 
 export default {
-  name: "TaskBox",
+  name: "TaskTree",
   components: {
     TaskTreeNode,
     TaskSidebarNode,
@@ -52,19 +52,8 @@ export default {
   },
   data() {
     const rootId = Date.now();
-    const rootNode = {
-      id: rootId,
-      parentId: null,
-      text: ``,
-      estimatedTime: 90,
-      remainingTime: 90 * 60,
-      startTime: 0,
-      elapsedTime: 0,
-      completed: 0,
-      timeStamp: getFormattedDate(),
-      children: [],
-    };
-
+    const rootNode = this.createNode(true);
+    
     return {
       nodes: [rootNode],
       nodeMap: { [rootId]: rootNode },
@@ -85,25 +74,28 @@ export default {
     },
   },
   methods: {
-    addChild(parentId) {
-      const newNodeId = Date.now();
-      const newNode = {
-        id: newNodeId,
+    createNode(isRoot, parentId = null) {
+      const nodeId = Date.now();
+      return {
+        id: nodeId,
         parentId: parentId,
-        text: ``,
-        estimatedTime: 5,
-        remainingTime: 5 * 60,
+        text: '',
+        comment: '',
+        estimatedTime: isRoot ? 90 : 5,
+        remainingTime: (isRoot ? 90 : 5) * 60,
         startTime: 0,
         elapsedTime: 0,
         completed: 0,
-        timeStamp: getFormattedTime(),
+        timeStamp: isRoot ? getFormattedDate() : getFormattedTime(),
         children: [],
       };
-
+    },
+    addChild(parentId) {
+      const newNode = this.createNode(false, parentId);
       const parentNode = this.nodeMap[parentId];
       if (parentNode) {
         parentNode.children.push(newNode);
-        this.nodeMap[newNodeId] = newNode;
+        this.nodeMap[newNode.id] = newNode;
       }
     },
     deleteNode(nodeId) {

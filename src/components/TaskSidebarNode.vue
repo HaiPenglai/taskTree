@@ -1,16 +1,20 @@
-<!-- src/components/TaskSidebarNode.vue -->
 <template>
   <button
     class="task-sidebar-node"
     @click.stop="$emit('locate-node', node.id)"
-    :class="{ active: isActive }"
+    :class="{ active: isActive, 'snoozed': isSnoozed }"
   >
-    <div class="index-badge">{{ index }}</div>
+    <div 
+      class="index-badge" 
+      @click.stop="toggleSnooze"
+    >
+      {{ index }}
+    </div>
     {{ node.text || "未命名" }}
   </button>
 </template>
   
-  <script>
+<script>
 export default {
   name: "TaskSidebarNode",
   props: {
@@ -27,10 +31,20 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isSnoozed: false
+    };
+  },
+  methods: {
+    toggleSnooze() {
+      this.isSnoozed = !this.isSnoozed;
+    }
+  }
 };
 </script>
   
-  <style scoped>
+<style scoped>
 .task-sidebar-node {
   position: relative;
   padding: 10px 10px 10px 34px;
@@ -50,6 +64,10 @@ export default {
   text-overflow: ellipsis;
 }
 
+.task-sidebar-node.snoozed {
+  opacity: 0.5;
+}
+
 .index-badge {
   position: absolute;
   left: 0;
@@ -62,7 +80,8 @@ export default {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  border-radius: 4px 0 0 4px; /* 左端圆角 */
+  border-radius: 4px 0 0 4px;
+  cursor: pointer;
 }
 
 .task-sidebar-node:hover {
