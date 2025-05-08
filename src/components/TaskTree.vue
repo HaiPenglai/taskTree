@@ -12,7 +12,7 @@
           @locate-node="scrollToNode"
         />
       </div>
-      <div class="task-tree-container">
+      <div class="task-tree-container" @dblclick="handleContainerDoubleClick">
         <TaskTreeNode
           v-for="node in nodes"
           :key="node.id"
@@ -48,12 +48,12 @@ export default {
     TaskTreeNode,
     TaskSidebarNode,
     TaskProgressBar,
-    TaskNavbarNode
+    TaskNavbarNode,
   },
   data() {
     const rootId = Date.now();
     const rootNode = this.createNode(true);
-    
+
     return {
       nodes: [rootNode],
       nodeMap: { [rootId]: rootNode },
@@ -69,7 +69,7 @@ export default {
     runningNodes() {
       // 获取所有正在运行的节点并按剩余时间排序
       return Object.values(this.nodeMap)
-        .filter(node => node.startTime > 0 && node.completed === 0)
+        .filter((node) => node.startTime > 0 && node.completed === 0)
         .sort((a, b) => a.remainingTime - b.remainingTime);
     },
   },
@@ -79,8 +79,8 @@ export default {
       return {
         id: nodeId,
         parentId: parentId,
-        text: '',
-        comment: '',
+        text: "",
+        comment: "",
         estimatedTime: isRoot ? 90 : 5,
         remainingTime: (isRoot ? 90 : 5) * 60,
         startTime: 0,
@@ -98,28 +98,66 @@ export default {
         this.nodeMap[newNode.id] = newNode;
       }
     },
+    addRootNode() {
+      const newNode = this.createNode(true);
+      this.nodes.push(newNode);
+      this.nodeMap[newNode.id] = newNode;
+    },
+    handleContainerDoubleClick(event) {
+      if (this.isClickOnEmptyArea(event)) {
+        this.addRootNode();
+      }
+    },
+    isClickOnEmptyArea(event) {
+      let element = event.target;
+
+      while (element && element !== event.currentTarget) {
+        if (
+          element.classList.contains("node-content") ||
+          element.classList.contains("comment-container")
+        ) {
+          return false;
+        }
+        element = element.parentElement;
+      }
+
+      return true;
+    },
     deleteNode(nodeId) {
       const nodeToDelete = this.nodeMap[nodeId];
       if (!nodeToDelete) return;
 
       if (nodeToDelete.parentId === null) {
-        nodeToDelete.children = [];
-        return;
-      }
+        const rootNodes = this.nodes.filter((node) => node.parentId === null);
 
-      const parentNode = this.nodeMap[nodeToDelete.parentId];
-      if (parentNode) {
-        const index = parentNode.children.findIndex(
-          (child) => child.id === nodeId
-        );
-        if (index !== -1) {
-          parentNode.children.splice(index, 1);
+        if (rootNodes.length === 1) {
+          nodeToDelete.children.forEach((child) => {
+            this.deleteNode(child.id);
+          });
+          nodeToDelete.children = [];
+          return;
+        } else {
+          const index = this.nodes.findIndex((node) => node.id === nodeId);
+          if (index !== -1) {
+            this.nodes.splice(index, 1);
+          }
+        }
+      } else {
+        const parentNode = this.nodeMap[nodeToDelete.parentId];
+        if (parentNode) {
+          const index = parentNode.children.findIndex(
+            (child) => child.id === nodeId
+          );
+          if (index !== -1) {
+            parentNode.children.splice(index, 1);
+          }
         }
       }
 
       const removeFromMap = (node) => {
         node.children.forEach((child) => removeFromMap(child));
         delete this.nodeMap[node.id];
+        this.$forceUpdate(); 
       };
       removeFromMap(nodeToDelete);
     },
