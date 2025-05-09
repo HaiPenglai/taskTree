@@ -34,7 +34,7 @@ npm install
 | `npm start`  | 启动`electron`应用显示`dist-vue`目录中的前端代码 |
 | `npm run pack`      | 把`electron`应用生成一个包到dist，点击.exe可运行 |
 | `npm run installer` | 把`electron`应用生成安装包到dist，点击.exe可安装 |
-| `npx http-server -p 3000` | 在dist文件夹执行，使用`http://127.0.0.1:3000/index.html`访问网页|
+| `npx http-server -p 3001` | 在dist文件夹执行，使用`http://127.0.0.1:3001/index.html`访问网页|
 
 ### 📁 项目结构
 
