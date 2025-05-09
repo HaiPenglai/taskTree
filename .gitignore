@@ -16,5 +16,8 @@
 
 package-lock.json
 dist/**
+dist-vue/**
+dist-electron/**
+dist-installer/**
 node_modules/**
 temp.md

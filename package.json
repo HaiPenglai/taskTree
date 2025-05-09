@@ -1,11 +1,18 @@
 {
   "name": "tasktree",
   "version": "1.0.0",
+  "author": "HaiPenglai",
   "description": "Helps reduce procrastination, ADHD, and decision fatigue through hierarchical task organization and task recommendations.",
+  "keywords": [
+    "productivity",
+    "ADHD",
+    "task-management"
+  ],
+  "license": "ISC",
   "main": "main.js",
   "scripts": {
     "ui": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --dest dist-vue",
     "start": "electron . --enable-logging",
     "pack": "electron-builder --dir",
     "installer": "electron-builder --win --x64",
@@ -13,28 +20,33 @@
   },
   "build": {
     "appId": "com.haipenglai.tasktree",
+    "npmRebuild": false,
     "productName": "TaskTree",
-    "icon": "build/icon.ico",
+    "icon": "public/favicon.ico",
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "public/favicon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/favicon.ico",
+      "uninstallerIcon": "public/favicon.ico"
     },
     "files": [
-      "dist/**/*",
+      "dist-vue/**/*",
       "main.js"
+    ],
+    "extraResources": [
+      {
+        "from": "server",
+        "to": "server",
+        "filter": [
+          "**/*"
+        ]
+      }
     ]
   },
-  "keywords": [
-    "productivity",
-    "ADHD",
-    "task-management"
-  ],
-  "author": "HaiPenglai",
-  "license": "ISC",
   "devDependencies": {
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-router": "^5.0.8",

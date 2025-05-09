@@ -1,5 +1,17 @@
+// main.js
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
+
+process.env.IS_PACKAGED = app.isPackaged ? 'true' : 'false';
+function getAPIPath() {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'server', 'taskTreeAPI')
+  } else {
+    return path.join(__dirname, 'server', 'taskTreeAPI')
+  }
+}
+
+require(getAPIPath())
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -12,10 +24,12 @@ function createWindow() {
     }
   })
 
-  win.loadFile(path.join(__dirname, 'dist', 'index.html'))
+  win.loadFile(path.join(__dirname, 'dist-vue', 'index.html'))
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  createWindow()
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
