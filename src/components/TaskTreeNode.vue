@@ -219,6 +219,7 @@ export default {
 }
 
 .node-content {
+  min-width: 350px;
   display: flex;
   align-items: stretch;
   gap: 0;
