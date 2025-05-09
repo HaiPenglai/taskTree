@@ -2,16 +2,7 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
-process.env.IS_PACKAGED = app.isPackaged ? 'true' : 'false';
-function getAPIPath() {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, 'server', 'taskTreeAPI')
-  } else {
-    return path.join(__dirname, 'server', 'taskTreeAPI')
-  }
-}
-
-require(getAPIPath())
+require("./server/taskTreeAPI.js")
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -24,7 +15,11 @@ function createWindow() {
     }
   })
 
-  win.loadFile(path.join(__dirname, 'dist-vue', 'index.html'))
+  if (process.env.NODE_ENV === 'development') {
+    win.loadURL('http://localhost:8080')
+  } else {
+    win.loadFile(path.join(__dirname, 'dist-vue', 'index.html'))
+  }
 }
 
 app.whenReady().then(() => {

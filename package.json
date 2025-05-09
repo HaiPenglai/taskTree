@@ -13,9 +13,9 @@
   "scripts": {
     "ui": "vue-cli-service serve",
     "build": "vue-cli-service build --dest dist-vue",
-    "start": "electron . --enable-logging",
-    "pack": "electron-builder --dir",
-    "installer": "electron-builder --win --x64",
+    "start": "cross-env NODE_ENV=development electron . --enable-logging",
+    "pack": "cross-env NODE_ENV=production electron-builder --dir",
+    "installer": "cross-env NODE_ENV=production electron-builder --win --x64",
     "serve": "node server/taskTreeAPI.js"
   },
   "build": {
@@ -32,27 +32,15 @@
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "public/favicon.ico",
       "uninstallerIcon": "public/favicon.ico"
-    },
-    "files": [
-      "dist-vue/**/*",
-      "main.js"
-    ],
-    "extraResources": [
-      {
-        "from": "server",
-        "to": "server",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
+    }
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-router": "^5.0.8",
     "electron": "^28.0.0",
     "electron-builder": "^24.11.3",
-    "electron-devtools-installer": "^3.2.0"
+    "electron-devtools-installer": "^3.2.0",
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
     "@electron/get": "^4.0.0",

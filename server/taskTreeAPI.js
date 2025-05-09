@@ -15,9 +15,7 @@ app.use(cors({
 }));
 
 // 数据库文件路径
-const dbPath = process.env.IS_PACKAGED === 'true'
-  ? path.join(process.resourcesPath, 'server', 'task_tree.db')
-  : path.join(__dirname, 'task_tree.db');
+const dbPath = "./task_tree.db"
 
 // 检查并初始化数据库
 if (!fs.existsSync(dbPath)) {
