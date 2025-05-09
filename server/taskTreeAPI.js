@@ -6,7 +6,6 @@ require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json());
-const VERBOSE = 1;
 
 const cors = require('cors');
 app.use(cors({
@@ -27,12 +26,10 @@ const pool = mysql.createPool({
 
 // 获取或创建任务树
 app.get('/api/task-tree/:user_id/:date', async (req, res) => {
-    if (VERBOSE > 0) {
-        console.log(`[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}] [GET] user ${req.params.user_id}, date ${req.params.date}`);
-        if (VERBOSE > 1) {
-            console.log('Request headers:', req.headers);
-        }
-    }
+
+    console.log(`[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}] [GET] user ${req.params.user_id}, date ${req.params.date}`);
+    // console.log('Request headers:', req.headers);
+
     try {
         const { user_id, date } = req.params;
 
@@ -77,12 +74,10 @@ app.get('/api/task-tree/:user_id/:date', async (req, res) => {
 
 // 保存任务树
 app.post('/api/task-tree/:user_id/:date', async (req, res) => {
-    if (VERBOSE > 0) {
-        console.log(`[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}] [POST] user ${req.params.user_id}, date ${req.params.date}`);
-        if (VERBOSE > 1){
-            console.log('Request body:', req.body);
-        }
-    }
+
+    console.log(`[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}] [POST] user ${req.params.user_id}, date ${req.params.date}`);
+    // console.log('Request body:', req.body);
+
     try {
         const { user_id, date } = req.params;
         const { nodes } = req.body;
