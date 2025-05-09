@@ -39,11 +39,13 @@
               :disabled="node.completed != 0"
             >
               {{
-                node.completed == 1 || timerRunning == true
-                  ? "完成"
-                  : node.completed == 0
+                this.node.completed == 1
+                  ? "成功"
+                  : node.completed == -1
+                  ? "失败"
+                  : this.node.startTime == 0
                   ? "开始"
-                  : "失败"
+                  : "完成"
               }}
             </button>
             <button
@@ -119,15 +121,16 @@ export default {
   data() {
     return {
       editing: false,
-      timerRunning: false,
       timerInterval: null,
       showComment: this.node.comment != "",
     };
   },
-  mounted(){
+  mounted() {
     this.$nextTick(() => {
-        this.autoResize();
-      });
+      this.autoResize();
+      console.log("task tree node mounted", this.node);
+      if(this.node.completed == 0 && this.node.startTime != 0)this.runTimer();
+    });
   },
   methods: {
     autoResize() {
@@ -138,31 +141,24 @@ export default {
     addChild() {
       this.$emit("add-child", this.node.id);
     },
+    runTimer() {
+      this.timerInterval = setInterval(() => {
+        this.node.elapsedTime += 1;
+        this.node.remainingTime = this.node.estimatedTime * 60 - this.node.elapsedTime;
+        if (this.node.remainingTime <= 0) {
+          clearInterval(this.timerInterval);
+          this.node.completed = -1;
+          this.node.remainingTime = 0;
+        }
+      }, 1000);
+    },
     toggleTimer() {
-      if (this.timerRunning) {
+      if (this.node.completed == 0 && this.node.startTime != 0) {
         clearInterval(this.timerInterval);
-        this.timerRunning = false;
         this.node.completed = 1;
       } else {
-        this.timerRunning = true;
         this.node.startTime = Date.now();
-
-        this.timerInterval = setInterval(() => {
-          this.node.elapsedTime = Math.floor(
-            (Date.now() - this.node.startTime) / 1000
-          );
-          this.node.remainingTime = Math.max(
-            0,
-            this.node.estimatedTime * 60 - this.node.elapsedTime
-          );
-
-          if (this.node.remainingTime <= 0) {
-            clearInterval(this.timerInterval);
-            this.timerRunning = false;
-            this.node.completed = -1;
-            this.node.remainingTime = 0;
-          }
-        }, 1000);
+        this.runTimer();
       }
     },
     updateRemainingTime() {
