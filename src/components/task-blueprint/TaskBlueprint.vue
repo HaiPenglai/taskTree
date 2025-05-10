@@ -25,6 +25,14 @@
           @move-node="moveNode"
         />
       </div>
+      <div class="navbar-container">
+        <TaskBlueprintNavbarNode
+          v-for="node in completedRootNodes"
+          :key="node.id"
+          :node="node"
+          @locate-node="scrollToNode"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -34,12 +42,14 @@
 import TaskBlueprintNode from "./TaskBlueprintNode.vue";
 import { getFormattedDate } from "../../utils/dateTimeUtils";
 import TaskBlueprintSidebarNode from "./TaskBlueprintSidebarNode.vue";
+import TaskBlueprintNavbarNode from "./TaskBlueprintNavbarNode.vue";
 
 export default {
   name: "TaskBlueprint",
   components: {
     TaskBlueprintNode,
     TaskBlueprintSidebarNode,
+    TaskBlueprintNavbarNode,
   },
   data() {
     const rootId = Date.now();
@@ -55,6 +65,11 @@ export default {
   computed: {
     pendingRootNodes() {
       return this.nodes.filter((node) => node.completed === 0);
+    },
+    completedRootNodes() {
+      return this.nodes
+        .filter((node) => node.completed === 1)
+        .sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp));
     },
   },
   async created() {
@@ -241,7 +256,7 @@ export default {
   background-color: white;
   border-right: 2px solid #9c64ff;
   overflow-y: auto;
-  padding: 10px 0;
+  padding: 2px 0;
 }
 
 .blueprint-container {
@@ -251,6 +266,14 @@ export default {
   gap: 10px;
   overflow-y: auto;
   padding: 15px;
+}
+
+.navbar-container {
+  width: 250px;
+  background-color: white;
+  border-left: 2px solid #f46f99;
+  overflow-y: auto;
+  padding: 2px 0;
 }
 
 .task-tree-container {

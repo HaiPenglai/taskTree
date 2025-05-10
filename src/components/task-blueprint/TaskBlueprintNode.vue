@@ -118,7 +118,7 @@ export default {
     box-shadow: 0 0 0 0 rgba(124, 179, 241, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 20px rgba(0, 122, 255, 0);
+    box-shadow: 0 0 0 100px rgba(0, 122, 255, 0);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(0, 122, 255, 0);

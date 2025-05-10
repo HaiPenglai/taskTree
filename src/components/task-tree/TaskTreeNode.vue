@@ -198,10 +198,10 @@ export default {
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(241, 143, 124, 0.7);
+    box-shadow: 0 0 0 0 rgba(126, 241, 124, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 20px rgba(255, 215, 0, 0);
+    box-shadow: 0 0 0 100px rgba(255, 215, 0, 0);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
