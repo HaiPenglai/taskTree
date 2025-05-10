@@ -1,17 +1,20 @@
 <!-- src\App.vue -->
 <template>
   <div id="app">
-    <TaskTree />
+    <TaskBlueprint />
+    <!-- <TaskTree /> -->
   </div>
 </template>
 
 <script>
-import TaskTree from './components/task-tree/TaskTree.vue'
+import TaskTree from './components/task-tree/TaskTree.vue';
+import TaskBlueprint from './components/task-blueprint/TaskBlueprint.vue';
 
 export default {
   name: 'App',
   components: {
-    TaskTree
+    TaskTree,
+    TaskBlueprint
   }
 }
 </script>

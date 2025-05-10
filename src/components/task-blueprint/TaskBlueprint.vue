@@ -1,63 +1,34 @@
-<!-- src\components\task-tree\TaskTree.vue -->
+<!-- src\components\task-blueprint\TaskBlueprint.vue -->
 <template>
   <div class="task-container">
     <div class="loading-text" v-if="loadError != null">
       {{ loadError }}
     </div>
 
-    <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
-    <div class="content-wrapper">
-      <div class="sidebar-container">
-        <TaskSidebarNode
-          v-for="(node, index) in pendingNodes"
-          :key="node.id"
-          :node="node"
-          :index="index + 1"
-          @locate-node="scrollToNode"
-        />
-      </div>
-      <div class="task-tree-container" @dblclick="handleContainerDoubleClick">
-        <TaskTreeNode
-          v-for="node in nodes"
-          :key="node.id"
-          :node="node"
-          @add-child="addChild"
-          @delete-node="deleteNode"
-          @move-node="moveNode"
-        />
-      </div>
-      <div class="navbar-container">
-        <TaskNavbarNode
-          v-for="node in runningNodes"
-          :key="node.id"
-          :node="node"
-          @locate-node="scrollToNode"
-        />
-      </div>
+    <div class="task-tree-container" @dblclick="handleContainerDoubleClick">
+      <TaskBlueprintNode
+        v-for="node in nodes"
+        :key="node.id"
+        :node="node"
+        @add-child="addChild"
+        @delete-node="deleteNode"
+        @move-node="moveNode"
+      />
     </div>
   </div>
-
-  <input type="date" v-model="selectedDate" class="date-input" />
 </template>
 
 
 <script>
-import TaskTreeNode from "./TaskTreeNode.vue";
-import TaskSidebarNode from "./TaskSidebarNode.vue";
-import TaskProgressBar from "./TaskProgressBar.vue";
-import TaskNavbarNode from "./TaskNavbarNode.vue";
-import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
+import TaskBlueprintNode from "./TaskBlueprintNode.vue";
+import { getFormattedDate } from "../../utils/dateTimeUtils";
 
 export default {
-  name: "TaskTree",
+  name: "TaskBlueprint",
   components: {
-    TaskTreeNode,
-    TaskSidebarNode,
-    TaskProgressBar,
-    TaskNavbarNode,
+    TaskBlueprintNode,
   },
   data() {
-    const today = getFormattedDate();
     const rootId = Date.now();
     const rootNode = this.createNode(true);
 
@@ -66,28 +37,7 @@ export default {
       nodeMap: { [rootId]: rootNode },
       userId: 1,
       loadError: null,
-      saveTimer: null,
-      selectedDate: today,
     };
-  },
-  computed: {
-    pendingNodes() {
-      return Object.values(this.nodeMap)
-        .filter((node) => node.completed === 0)
-        .sort((a, b) => a.estimatedTime - b.estimatedTime);
-    },
-    runningNodes() {
-      return Object.values(this.nodeMap)
-        .filter((node) => node.startTime > 0 && node.completed === 0)
-        .sort((a, b) => a.remainingTime - b.remainingTime);
-    },
-  },
-  watch: {
-    selectedDate(newDate, oldDate) {
-      if (newDate !== oldDate) {
-        this.loadTaskTree();
-      }
-    },
   },
   async created() {
     await this.loadTaskTree();
@@ -107,33 +57,30 @@ export default {
       this.loadError = "Loading";
       try {
         const response = await this.$axios.get(
-          `/api/task-tree/${this.userId}/${this.selectedDate}`
+          `/api/task-blueprint/${this.userId}`
         );
         this.nodes = response.data.nodes;
         this.buildNodeMap();
         this.loadError = null;
       } catch (error) {
         this.createDefaultTree();
-        this.loadError = "加载任务树失败，将使用默认数据";
+        this.loadError = "加载任务蓝图失败，将使用默认数据";
       }
     },
     async saveTaskTree() {
       if (this.loadError != null) return;
       try {
-        await this.$axios.post(
-          `/api/task-tree/${this.userId}/${this.selectedDate}`,
-          {
-            nodes: this.nodes,
-          }
-        );
+        await this.$axios.post(`/api/task-blueprint/${this.userId}`, {
+          nodes: this.nodes,
+        });
         this.loadError = null;
       } catch (error) {
-        this.loadError = "保存任务树失败，请检查网络连接";
+        this.loadError = "保存任务蓝图失败，请检查网络连接";
       }
     },
     createDefaultTree() {
       const rootId = Date.now();
-      const rootNode = this.createNode(1);
+      const rootNode = this.createNode();
       this.nodes = [rootNode];
       this.nodeMap = { [rootId]: rootNode };
     },
@@ -151,24 +98,19 @@ export default {
       this.nodeMap = map;
     },
 
-    createNode(isRoot, parentId = null) {
+    createNode(parentId = null) {
       const nodeId = Date.now();
       return {
         id: nodeId,
         parentId: parentId,
         text: "",
-        comment: "",
-        estimatedTime: isRoot ? 90 : 5,
-        remainingTime: (isRoot ? 90 : 5) * 60,
-        startTime: 0,
-        elapsedTime: 0,
         completed: 0,
-        timeStamp: isRoot ? getFormattedDate() : getFormattedTime(),
+        timeStamp: getFormattedDate(),
         children: [],
       };
     },
     addChild(parentId) {
-      const newNode = this.createNode(false, parentId);
+      const newNode = this.createNode(parentId);
       const parentNode = this.nodeMap[parentId];
       if (parentNode) {
         parentNode.children.push(newNode);
@@ -176,7 +118,7 @@ export default {
       }
     },
     addRootNode() {
-      const newNode = this.createNode(true);
+      const newNode = this.createNode();
       this.nodes.push(newNode);
       this.nodeMap[newNode.id] = newNode;
     },
@@ -187,17 +129,12 @@ export default {
     },
     isClickOnEmptyArea(event) {
       let element = event.target;
-
       while (element && element !== event.currentTarget) {
-        if (
-          element.classList.contains("node-content") ||
-          element.classList.contains("comment-container")
-        ) {
+        if (element.classList.contains("node-content")) {
           return false;
         }
         element = element.parentElement;
       }
-
       return true;
     },
     deleteNode(nodeId) {
@@ -274,19 +211,6 @@ export default {
   overflow: hidden;
 }
 
-.content-wrapper {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.sidebar-container {
-  width: 250px;
-  background-color: white;
-  border-right: 2px solid #3481ce;
-  overflow-y: auto;
-}
-
 .task-tree-container {
   flex-grow: 1;
   display: flex;
@@ -296,30 +220,8 @@ export default {
   padding: 5px;
 }
 
-.navbar-container {
-  width: 250px;
-  background-color: white;
-  border-left: 2px solid #4db6ac; /* 青色边框 */
-  overflow-y: auto;
-}
-
 .loading-text {
   color: grey;
-}
-
-.date-input {
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
-  width: 120px;
-  padding: 4px;
-  border: none;
-  outline: none;
-  border-radius: 4px;
-  font-size: 16px;
-  background-color: #b4d9fe;
-  color: white;
-  font-weight: bold;
 }
 </style>
 
