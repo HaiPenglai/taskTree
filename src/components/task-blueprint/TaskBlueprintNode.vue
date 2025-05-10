@@ -1,6 +1,7 @@
 <!-- src\components\task-blueprint\TaskBlueprintNode.vue -->
 <template>
-  <div class="task-tree-node">
+  <button class="hide-button" @click="hideNode" v-if="node.hidden">-</button>
+  <div class="task-tree-node" v-else>
     <div
       class="node-content"
       :class="{
@@ -27,6 +28,7 @@
             <button class="triangle-up" @click="moveUp"></button>
             <button class="triangle-down" @click="moveDown"></button>
           </div>
+          <button class="hide-button" @click="hideNode">-</button>
         </div>
         <textarea
           v-model="node.text"
@@ -86,6 +88,7 @@ export default {
     },
     autoResize() {
       const textarea = this.$refs.textarea;
+      if(textarea == null)return;
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     },
@@ -98,6 +101,9 @@ export default {
     toggleComplete() {
       this.node.completed = this.node.completed === 1 ? 0 : 1;
     },
+    hideNode(){
+      this.node.hidden = 1 - this.node.hidden;
+    }
   },
 };
 </script>
@@ -143,7 +149,7 @@ export default {
 }
 
 .time-stamp.completed {
-  color: #fef668 ;
+  color: #fef668;
 }
 
 .node-main {
@@ -229,6 +235,19 @@ export default {
 
 .triangle-down {
   clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
+
+.hide-button {
+  height: 20px;
+  width: 21px;
+  background-color: #4a90e2;
+  border: none;
+  color: white;
+  cursor: pointer;;
+}
+
+.hide-button:hover {
+  background-color: #3077c9;
 }
 
 .add-button {

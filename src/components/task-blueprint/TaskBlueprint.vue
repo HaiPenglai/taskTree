@@ -69,7 +69,7 @@ export default {
     completedRootNodes() {
       return this.nodes
         .filter((node) => node.completed === 1)
-        .sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp));
+        .sort((a, b) => b.id - a.id);
     },
   },
   async created() {
@@ -85,6 +85,7 @@ export default {
     }
     this.saveTaskTree();
   },
+  emits: ['add-child', 'delete-node', 'move-node'],
   methods: {
     async loadTaskTree() {
       this.loadError = "Loading";
@@ -139,6 +140,7 @@ export default {
         text: "",
         completed: 0,
         timeStamp: getFormattedDate(),
+        hidden: 0,
         children: [],
       };
     },

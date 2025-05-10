@@ -190,6 +190,7 @@ app.get('/api/task-blueprint/:user_id', async (req, res) => {
                         text: "蓝图根节点",
                         completed: 0,
                         timeStamp: new Date().toISOString().split('T')[0],
+                        hidden: 0,
                         children: []
                     }];
 
