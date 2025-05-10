@@ -5,10 +5,10 @@
       {{ loadError }}
     </div>
 
-    <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
+    <TaskTreeProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
     <div class="content-wrapper">
       <div class="sidebar-container">
-        <TaskSidebarNode
+        <TaskTreeSidebarNode
           v-for="(node, index) in pendingNodes"
           :key="node.id"
           :node="node"
@@ -27,7 +27,7 @@
         />
       </div>
       <div class="navbar-container">
-        <TaskNavbarNode
+        <TaskTreeNavbarNode
           v-for="node in runningNodes"
           :key="node.id"
           :node="node"
@@ -43,18 +43,18 @@
 
 <script>
 import TaskTreeNode from "./TaskTreeNode.vue";
-import TaskSidebarNode from "./TaskSidebarNode.vue";
-import TaskProgressBar from "./TaskProgressBar.vue";
-import TaskNavbarNode from "./TaskNavbarNode.vue";
+import TaskTreeSidebarNode from "./TaskTreeSidebarNode.vue";
+import TaskTreeProgressBar from "./TaskTreeProgressBar.vue";
+import TaskTreeNavbarNode from "./TaskTreeNavbarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
 
 export default {
   name: "TaskTree",
   components: {
     TaskTreeNode,
-    TaskSidebarNode,
-    TaskProgressBar,
-    TaskNavbarNode,
+    TaskTreeSidebarNode,
+    TaskTreeProgressBar,
+    TaskTreeNavbarNode,
   },
   data() {
     const today = getFormattedDate();
@@ -158,8 +158,8 @@ export default {
         parentId: parentId,
         text: "",
         comment: "",
-        estimatedTime: isRoot ? 90 : 5,
-        remainingTime: (isRoot ? 90 : 5) * 60,
+        estimatedTime: isRoot ? 10 : 3,
+        remainingTime: (isRoot ? 10 : 3) * 60,
         startTime: 0,
         elapsedTime: 0,
         completed: 0,

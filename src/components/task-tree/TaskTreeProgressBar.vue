@@ -1,4 +1,4 @@
-<!-- src\components\task-tree\TaskProgressBar.vue -->
+<!-- src\components\task-tree\TaskTreeProgressBar.vue -->
 <template>
   <div class="progress-bar-container">
     <div class="progress-bar">
@@ -13,7 +13,7 @@
         :title="getTaskTooltip(task)"
       >
         <div class="task-label" v-if="hoveredTaskId === task.id">
-          {{ truncateText(task.text || "未命名", 15) }}
+          {{ truncateText(task.text || "开始构思任务", 15) }}
         </div>
       </div>
     </div>
@@ -24,7 +24,7 @@
 import { getFormattedTime } from "../../utils/dateTimeUtils";
 
 export default {
-  name: "TaskProgressBar",
+  name: "TaskTreeProgressBar",
   props: {
     nodeMap: {
       type: Object,
@@ -75,7 +75,7 @@ export default {
       const start = getFormattedTime(task.startTime);
       const end = getFormattedTime(task.startTime + task.elapsedTime * 1000); //输入毫秒格式
       return `${
-        task.text || "未命名"
+        task.text || "开始构思任务"
       }\n${start} - ${end}\n已进行: ${Math.floor(task.elapsedTime / 60)}分钟`;
     },
 
@@ -83,7 +83,7 @@ export default {
       this.$emit("locate-node", nodeId);
     },
     truncateText(text, maxLength) {
-      if (!text) return "未命名";
+      if (!text) return "开始构思任务";
       return text.length > maxLength
         ? text.substring(0, maxLength) + "..."
         : text;

@@ -1,23 +1,25 @@
-<!-- src\components\task-tree\TaskSidebarNode.vue -->
+<!-- src\components\task-tree\TaskTreeNavbarNode.vue -->
 <template>
   <button
-    class="task-sidebar-node"
+    class="task-navbar-node"
     @click.stop="$emit('locate-node', node.id)"
     :class="{ active: isActive, 'snoozed': isSnoozed }"
   >
     <div 
-      class="index-badge" 
+      class="time-badge" 
       @click.stop="toggleSnooze"
     >
-      {{ index }}
+      {{ formattedTime }}
     </div>
-    {{ node.text || "未命名" }}
+    {{ node.text || "开始构思任务" }}
   </button>
 </template>
-  
+
 <script>
+import { getFormattedTime } from "../../utils/dateTimeUtils";
+
 export default {
-  name: "TaskSidebarNode",
+  name: "TaskTreeNavbarNode",
   props: {
     node: {
       type: Object,
@@ -27,15 +29,18 @@ export default {
       type: Boolean,
       default: false,
     },
-    index: {
-      type: Number,
-      required: true,
-    },
   },
   data() {
     return {
       isSnoozed: false
     };
+  },
+  computed: {
+    formattedTime() {
+      const minutes = Math.floor(this.node.remainingTime / 60);
+      const seconds = this.node.remainingTime % 60;
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    },
   },
   methods: {
     toggleSnooze() {
@@ -44,15 +49,15 @@ export default {
   }
 };
 </script>
-  
+
 <style scoped>
-.task-sidebar-node {
+.task-navbar-node {
   position: relative;
-  padding: 10px 10px 10px 34px;
+  padding: 10px 10px 10px 8px;
   margin: 0 0 4px;
-  border-radius: 6px 0 0 6px;
+  border-radius: 0 6px 6px 0;
   width: 100%;
-  background-color: #bfeafe;
+  background-color: #d4f3f0;
   border: none;
   color: #424242;
   text-align: left;
@@ -64,31 +69,31 @@ export default {
   text-overflow: ellipsis;
 }
 
-.task-sidebar-node.snoozed {
+.task-navbar-node.snoozed {
   opacity: 0.5;
 }
 
-.index-badge {
+.time-badge {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 0;
   bottom: 0;
-  width: 28px;
-  background: #63b5ec;
+  width: 40px;
+  background: #4db6ac;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  border-radius: 4px 0 0 4px;
+  border-radius: 0 4px 4px 0;
   cursor: pointer;
 }
 
-.task-sidebar-node:hover {
-  background-color: #81d4fa;
+.task-navbar-node:hover {
+  background-color: #b2ebf2;
 }
 
-.task-sidebar-node:hover .index-badge {
-  background-color: #378fc5;
+.task-navbar-node:hover .time-badge {
+  background-color: #26a69a;
 }
 </style>

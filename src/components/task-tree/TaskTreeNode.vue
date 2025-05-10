@@ -63,7 +63,7 @@
             v-model="node.text"
             ref="textarea"
             class="node-text"
-            :placeholder="'输入任务内容'"
+            :placeholder="'开始构思任务'"
             @focus="editing = true"
             @blur="editing = false"
             @input="autoResize"
@@ -73,15 +73,14 @@
           ></textarea>
         </div>
         <button
-          class="action-button add-button"
+          class="add-button"
           @click.stop="addChild"
-          :disabled="node.completed != 0"
         >
           +
         </button>
       </div>
       <div class="comment-container">
-        <CommentNode
+        <TaskTreeCommentNode
           v-model:comment="node.comment"
           :show-comment="showComment"
         />
@@ -105,12 +104,12 @@
 </template>
 
 <script>
-import CommentNode from "./CommentNode.vue";
+import TaskTreeCommentNode from "./TaskTreeCommentNode.vue";
 
 export default {
   name: "TaskTreeNode",
   components: {
-    CommentNode,
+    TaskTreeCommentNode,
   },
   props: {
     node: {

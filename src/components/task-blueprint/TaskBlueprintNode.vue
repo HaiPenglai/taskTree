@@ -31,7 +31,7 @@
           v-model="node.text"
           ref="textarea"
           class="node-text"
-          :placeholder="'输入任务内容'"
+          :placeholder="'开始构思任务'"
           @focus="editing = true"
           @blur="editing = false"
           @input="autoResize"

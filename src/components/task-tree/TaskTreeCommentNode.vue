@@ -1,11 +1,11 @@
-<!-- src\components\task-tree\CommentNode.vue -->
+<!-- src\components\task-tree\TaskTreeCommentNode.vue -->
 <template>
   <div class="comment-node" v-if="showComment">
     <textarea
       ref="textarea"
       v-model="commentText"
       class="comment-textarea"
-      placeholder="添加批注..."
+      placeholder="关键词"
       @input="autoResize"
       rows="1"
       style="resize: none; overflow: hidden"
@@ -15,7 +15,7 @@
 
 <script>
 export default {
-name: "CommentNode",
+name: "TaskTreeCommentNode",
 props: {
   comment: {
     type: String,
