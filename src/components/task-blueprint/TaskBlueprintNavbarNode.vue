@@ -42,7 +42,7 @@ export default {
   margin: 0 0 4px;
   border-radius: 0 6px 6px 0;
   width: 100%;
-  background-color: #ffd4f6;
+  background-color: #f3d4e9;
   border: none;
   color: #424242;
   text-align: left;
@@ -60,7 +60,7 @@ export default {
   top: 0;
   bottom: 0;
   width: 40px;
-  background: #f58ac8;
+  background: #b4558c;
   color: white;
   display: flex;
   align-items: center;
@@ -70,10 +70,10 @@ export default {
 }
 
 .task-blueprint-navbar-node:hover {
-  background-color: #ffbfeb;
+  background-color: #f2b2db;
 }
 
 .task-blueprint-navbar-node:hover .time-badge {
-  background-color: #fb62f1;
+  background-color: #a33581;
 }
 </style>

@@ -26,13 +26,21 @@
           @move-node="moveNode"
         />
       </div>
+
       <div class="navbar-container">
-        <TaskTreeNavbarNode
-          v-for="node in runningNodes"
-          :key="node.id"
-          :node="node"
-          @locate-node="scrollToNode"
-        />
+          <TaskTreeNavbarNode
+            v-for="node in runningNodes"
+            :key="node.id"
+            :node="node"
+            @locate-node="scrollToNode"
+          />
+
+          <TaskTreeOKNode
+            v-for="node in completedNodes"
+            :key="node.id"
+            :node="node"
+            @locate-node="scrollToNode"
+          />
       </div>
     </div>
   </div>
@@ -47,6 +55,7 @@ import TaskTreeSidebarNode from "./TaskTreeSidebarNode.vue";
 import TaskTreeProgressBar from "./TaskTreeProgressBar.vue";
 import TaskTreeNavbarNode from "./TaskTreeNavbarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
+import TaskTreeOKNode from './TaskTreeOKNode.vue';
 
 export default {
   name: "TaskTree",
@@ -55,6 +64,7 @@ export default {
     TaskTreeSidebarNode,
     TaskTreeProgressBar,
     TaskTreeNavbarNode,
+    TaskTreeOKNode
   },
   data() {
     const today = getFormattedDate();
@@ -80,6 +90,11 @@ export default {
       return Object.values(this.nodeMap)
         .filter((node) => node.startTime > 0 && node.completed === 0)
         .sort((a, b) => a.remainingTime - b.remainingTime);
+    },
+    completedNodes() {
+      return Object.values(this.nodeMap)
+        .filter((node) => node.completed != 0)
+        .sort((a, b) => new Date(b.startTime + b.elapsedTime) - new Date(a.startTime + a.elapsedTime));
     },
   },
   watch: {
