@@ -1,6 +1,9 @@
 <!-- src\components\task-tree\TaskTreeNode.vue -->
 <template>
-  <div class="task-tree-node">
+  <button class="hide-button" @click="hideNode" v-if="node.hidden == 1">
+    -
+  </button>
+  <div class="task-tree-node" v-else>
     <div class="node-self">
       <div
         class="node-content"
@@ -58,6 +61,7 @@
               <button class="triangle-up" @click="moveUp"></button>
               <button class="triangle-down" @click="moveDown"></button>
             </div>
+            <button class="hide-button" @click="hideNode">-</button>
           </div>
           <textarea
             v-model="node.text"
@@ -72,12 +76,7 @@
             :disabled="node.completed != 0"
           ></textarea>
         </div>
-        <button
-          class="add-button"
-          @click.stop="addChild"
-        >
-          +
-        </button>
+        <button class="add-button" @click.stop="addChild">+</button>
       </div>
       <div class="comment-container">
         <TaskTreeCommentNode
@@ -127,12 +126,14 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.autoResize();
-      if(this.node.completed == 0 && this.node.startTime != 0)this.runTimer();
+      if (this.node.completed == 0 && this.node.startTime != 0) this.runTimer();
     });
   },
+  emits: ['add-child', 'delete-node', 'move-node'],
   methods: {
     autoResize() {
       const textarea = this.$refs.textarea;
+      if(textarea == null)return;
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     },
@@ -142,7 +143,8 @@ export default {
     runTimer() {
       this.timerInterval = setInterval(() => {
         this.node.elapsedTime += 1;
-        this.node.remainingTime = this.node.estimatedTime * 60 - this.node.elapsedTime;
+        this.node.remainingTime =
+          this.node.estimatedTime * 60 - this.node.elapsedTime;
         if (this.node.remainingTime <= 0) {
           clearInterval(this.timerInterval);
           this.node.completed = -1;
@@ -175,6 +177,9 @@ export default {
     },
     moveDown() {
       this.$emit("move-node", { nodeId: this.node.id, direction: 1 });
+    },
+    hideNode() {
+      this.node.hidden = 1 - this.node.hidden;
     },
   },
   beforeUnmount() {
@@ -213,7 +218,7 @@ export default {
 }
 
 .node-content {
-  min-width: 370px;
+  min-width: 390px;
   display: flex;
   align-items: stretch;
   gap: 0;
@@ -310,6 +315,7 @@ export default {
 }
 
 .start-button {
+  cursor: pointer;
   background: #4caf50;
   color: white;
 }
@@ -358,6 +364,19 @@ export default {
 
 .triangle-down {
   clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
+
+.hide-button {
+  width: 18px;
+  height: 17px;
+  background: #4caf50;
+  color: white;
+  border: 0;
+  cursor: pointer;
+}
+
+.hide-button:hover {
+  background: #3e8e41;
 }
 
 .add-button {

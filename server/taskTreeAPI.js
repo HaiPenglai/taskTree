@@ -85,6 +85,7 @@ app.get('/api/task-tree/:user_id/:date', async (req, res) => {
                         elapsedTime: 0,
                         completed: 0,
                         timeStamp: date,
+                        hidden: 0,
                         children: []
                     }];
 
