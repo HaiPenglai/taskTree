@@ -1,3 +1,4 @@
+<!-- src\components\task-tree\TaskSidebarNode.vue -->
 <template>
   <button
     class="task-sidebar-node"
@@ -54,7 +55,6 @@ export default {
   background-color: #bfeafe;
   border: none;
   color: #424242;
-  font-weight: 320;
   text-align: left;
   font-size: 14px;
   cursor: pointer;

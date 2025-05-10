@@ -1,3 +1,4 @@
+<!-- src\components\task-tree\TaskNavbarNode.vue -->
 <template>
   <button
     class="task-navbar-node"
@@ -15,7 +16,7 @@
 </template>
 
 <script>
-import { getFormattedTime } from "../utils/dateTimeUtils";
+import { getFormattedTime } from "../../utils/dateTimeUtils";
 
 export default {
   name: "TaskNavbarNode",
@@ -59,7 +60,6 @@ export default {
   background-color: #d4f3f0;
   border: none;
   color: #424242;
-  font-weight: 320;
   text-align: left;
   font-size: 14px;
   cursor: pointer;

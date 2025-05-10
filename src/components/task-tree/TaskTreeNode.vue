@@ -1,4 +1,4 @@
-<!-- src\components\TaskTreeNode.vue -->
+<!-- src\components\task-tree\TaskTreeNode.vue -->
 <template>
   <div class="task-tree-node">
     <div class="node-self">
@@ -128,7 +128,6 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.autoResize();
-      console.log("task tree node mounted", this.node);
       if(this.node.completed == 0 && this.node.startTime != 0)this.runTimer();
     });
   },
@@ -215,7 +214,7 @@ export default {
 }
 
 .node-content {
-  min-width: 350px;
+  min-width: 370px;
   display: flex;
   align-items: stretch;
   gap: 0;

@@ -1,13 +1,15 @@
-<!-- src/components/TaskTree.vue -->
+<!-- src\components\task-tree\TaskTree.vue -->
 <template>
   <div class="task-container">
-    <div v-if="loadingState == 0" class="loading-overlay">
-      <div class="loading-spinner"></div>
-      Loading...
-    </div>
+    <div class="loading-text">
+      <div v-if="loadingState == 0">
+        <div class="loading-spinner"></div>
+        Loading...
+      </div>
 
-    <div v-if="loadError" class="error-message">
-      {{ loadError }}
+      <div v-if="loadError">
+        {{ loadError }}
+      </div>
     </div>
 
     <TaskProgressBar :node-map="nodeMap" @locate-node="scrollToNode" />
@@ -41,6 +43,8 @@
       </div>
     </div>
   </div>
+
+  <input type="date" v-model="selectedDate" class="date-input" />
 </template>
 
 
@@ -49,7 +53,7 @@ import TaskTreeNode from "./TaskTreeNode.vue";
 import TaskSidebarNode from "./TaskSidebarNode.vue";
 import TaskProgressBar from "./TaskProgressBar.vue";
 import TaskNavbarNode from "./TaskNavbarNode.vue";
-import { getFormattedDate, getFormattedTime } from "../utils/dateTimeUtils";
+import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
 
 export default {
   name: "TaskTree",
@@ -60,6 +64,7 @@ export default {
     TaskNavbarNode,
   },
   data() {
+    const today = getFormattedDate();
     const rootId = Date.now();
     const rootNode = this.createNode(true);
 
@@ -70,6 +75,7 @@ export default {
       loadingState: 0,
       loadError: null,
       saveTimer: null,
+      selectedDate: today,
     };
   },
   computed: {
@@ -82,6 +88,13 @@ export default {
       return Object.values(this.nodeMap)
         .filter((node) => node.startTime > 0 && node.completed === 0)
         .sort((a, b) => a.remainingTime - b.remainingTime);
+    },
+  },
+  watch: {
+    selectedDate(newDate, oldDate) {
+      if (newDate !== oldDate) {
+        this.loadTaskTree();
+      }
     },
   },
   async created() {
@@ -99,27 +112,31 @@ export default {
   },
   methods: {
     async loadTaskTree() {
+      this.loadingState = 0;
+      this.loadError = null;
       try {
-        const today = getFormattedDate();
         const response = await this.$axios.get(
-          `/api/task-tree/${this.userId}/${today}`
+          `/api/task-tree/${this.userId}/${this.selectedDate}`
         );
         this.nodes = response.data.nodes;
         this.buildNodeMap();
         this.loadingState = 1;
+        this.loadError = null;
       } catch (error) {
-        this.loadError = "加载任务树失败，将使用默认数据";
         this.createDefaultTree();
         this.loadingState = -1;
+        this.loadError = "加载任务树失败，将使用默认数据";
       }
     },
     async saveTaskTree() {
-      if (this.loadingState != 1)return ;
+      if (this.loadingState != 1) return;
       try {
-        const today = getFormattedDate();
-        await this.$axios.post(`/api/task-tree/${this.userId}/${today}`, {
-          nodes: this.nodes,
-        });
+        await this.$axios.post(
+          `/api/task-tree/${this.userId}/${this.selectedDate}`,
+          {
+            nodes: this.nodes,
+          }
+        );
         this.loadError = null;
       } catch (error) {
         console.error("Failed to save task tree:", error);
@@ -314,6 +331,25 @@ export default {
   background-color: white;
   border-left: 2px solid #4db6ac; /* 青色边框 */
   overflow-y: auto;
+}
+
+.loading-text{
+  color: grey;
+}
+
+.date-input {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 120px;
+  padding: 4px;
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #b4d9fe;
+  color: white;
+  font-weight: bold;
 }
 </style>
 

@@ -1,4 +1,4 @@
-<!-- src/components/TaskProgressBar.vue -->
+<!-- src\components\task-tree\TaskProgressBar.vue -->
 <template>
   <div class="progress-bar-container">
     <div class="progress-bar">
@@ -21,7 +21,7 @@
 </template>
   
   <script>
-import { getFormattedTime } from "../utils/dateTimeUtils";
+import { getFormattedTime } from "../../utils/dateTimeUtils";
 
 export default {
   name: "TaskProgressBar",
@@ -134,6 +134,6 @@ export default {
   border-radius: 4px;
   font-size: 10px;
   white-space: nowrap;
-  z-index: 10;
+  z-index: 10000;
 }
 </style>

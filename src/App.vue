@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import TaskTree from './components/TaskTree.vue'
+import TaskTree from './components/task-tree/TaskTree.vue'
 
 export default {
   name: 'App',

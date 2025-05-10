@@ -1,4 +1,4 @@
-<!-- src/components/CommentNode.vue -->
+<!-- src\components\task-tree\CommentNode.vue -->
 <template>
   <div class="comment-node" v-if="showComment">
     <textarea
