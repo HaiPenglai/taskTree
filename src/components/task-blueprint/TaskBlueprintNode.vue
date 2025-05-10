@@ -1,3 +1,4 @@
+<!-- src\components\task-blueprint\TaskBlueprintNode.vue -->
 <template>
   <div class="task-tree-node">
     <div
@@ -31,7 +32,7 @@
           v-model="node.text"
           ref="textarea"
           class="node-text"
-          :placeholder="'开始构思任务'"
+          :placeholder="'开始规划蓝图'"
           @focus="editing = true"
           @blur="editing = false"
           @input="autoResize"

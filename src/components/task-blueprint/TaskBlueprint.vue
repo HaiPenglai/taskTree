@@ -5,15 +5,26 @@
       {{ loadError }}
     </div>
 
-    <div class="task-tree-container" @dblclick="handleContainerDoubleClick">
-      <TaskBlueprintNode
-        v-for="node in nodes"
-        :key="node.id"
-        :node="node"
-        @add-child="addChild"
-        @delete-node="deleteNode"
-        @move-node="moveNode"
-      />
+    <div class="content-wrapper">
+      <div class="sidebar-container">
+        <TaskBlueprintSidebarNode
+          v-for="(node, index) in pendingRootNodes"
+          :key="node.id"
+          :node="node"
+          :index="index + 1"
+          @locate-node="scrollToNode"
+        />
+      </div>
+      <div class="blueprint-container" @dblclick="handleContainerDoubleClick">
+        <TaskBlueprintNode
+          v-for="node in nodes"
+          :key="node.id"
+          :node="node"
+          @add-child="addChild"
+          @delete-node="deleteNode"
+          @move-node="moveNode"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -22,11 +33,13 @@
 <script>
 import TaskBlueprintNode from "./TaskBlueprintNode.vue";
 import { getFormattedDate } from "../../utils/dateTimeUtils";
+import TaskBlueprintSidebarNode from "./TaskBlueprintSidebarNode.vue";
 
 export default {
   name: "TaskBlueprint",
   components: {
     TaskBlueprintNode,
+    TaskBlueprintSidebarNode,
   },
   data() {
     const rootId = Date.now();
@@ -38,6 +51,11 @@ export default {
       userId: 1,
       loadError: null,
     };
+  },
+  computed: {
+    pendingRootNodes() {
+      return this.nodes.filter((node) => node.completed === 0);
+    },
   },
   async created() {
     await this.loadTaskTree();
@@ -209,6 +227,30 @@ export default {
   flex-direction: column;
   max-height: 100vh;
   overflow: hidden;
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 0px;
+}
+
+.sidebar-container {
+  width: 250px;
+  background-color: white;
+  border-right: 2px solid #9c64ff;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+.blueprint-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 15px;
 }
 
 .task-tree-container {

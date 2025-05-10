@@ -5,48 +5,46 @@
     <TaskTree v-else-if="activeView === 'tree'" />
     <TaskSummary v-else-if="activeView === 'summary'" />
 
-    <button 
-      class="view-switcher"
-      @click="switchView"
-    >
+    <button class="view-switcher" @click="switchView">
       {{ switchButtonText }}
+      <span style="font-size: 9px; font-weight: bold;">F2</span>
     </button>
   </div>
 </template>
 
 <script>
-import TaskTree from './components/task-tree/TaskTree.vue';
-import TaskBlueprint from './components/task-blueprint/TaskBlueprint.vue';
-import TaskSummary from './components/task-summary/TaskSummary.vue';
+import TaskTree from "./components/task-tree/TaskTree.vue";
+import TaskBlueprint from "./components/task-blueprint/TaskBlueprint.vue";
+import TaskSummary from "./components/task-summary/TaskSummary.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     TaskTree,
     TaskBlueprint,
-    TaskSummary
+    TaskSummary,
   },
   data() {
     return {
-      activeView: 'tree',
-      viewOrder: ['tree', 'blueprint', 'summary']
-    }
+      activeView: "tree",
+      viewOrder: ["tree", "blueprint", "summary"],
+    };
   },
   computed: {
     switchButtonText() {
       const texts = {
-        'tree': '任务树',
-        'blueprint': '任务蓝图',
-        'summary': '任务摘要'
+        tree: "任务树",
+        blueprint: "任务蓝图",
+        summary: "任务摘要",
       };
       return texts[this.activeView];
-    }
+    },
   },
   mounted() {
-    window.addEventListener('keydown', this.handleKeyPress);
+    window.addEventListener("keydown", this.handleKeyPress);
   },
   beforeUnmount() {
-    window.removeEventListener('keydown', this.handleKeyPress);
+    window.removeEventListener("keydown", this.handleKeyPress);
   },
   methods: {
     switchView() {
@@ -55,16 +53,12 @@ export default {
       this.activeView = this.viewOrder[nextIndex];
     },
     handleKeyPress(event) {
-      if (event.key === '1') {
-        this.activeView = 'tree';
-      } else if (event.key === '2') {
-        this.activeView = 'blueprint';
-      } else if (event.key === '3') {
-        this.activeView = 'summary';
+      if (event.key === "F2") {
+        this.switchView();
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style>
@@ -88,13 +82,13 @@ body {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
 .view-switcher:hover {
   background-color: #6fcb5d;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 </style>2

@@ -1,4 +1,4 @@
-<!-- src\components\task-blueprint\TaskBlueprint.vue -->
+<!-- src\components\task-summary\TaskSummary.vue -->
 <template></template>
 
 
