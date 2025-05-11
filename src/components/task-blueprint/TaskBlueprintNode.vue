@@ -82,13 +82,18 @@ export default {
       editing: false,
     };
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.autoResize();
+    });
+  },
   methods: {
     addChild() {
       this.$emit("add-child", this.node.id);
     },
     autoResize() {
       const textarea = this.$refs.textarea;
-      if(textarea == null)return;
+      if (textarea == null) return;
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     },
@@ -101,9 +106,9 @@ export default {
     toggleComplete() {
       this.node.completed = this.node.completed === 1 ? 0 : 1;
     },
-    hideNode(){
+    hideNode() {
       this.node.hidden = 1 - this.node.hidden;
-    }
+    },
   },
 };
 </script>
@@ -243,7 +248,7 @@ export default {
   background-color: #4a90e2;
   border: none;
   color: white;
-  cursor: pointer;;
+  cursor: pointer;
 }
 
 .hide-button:hover {
