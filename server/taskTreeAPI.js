@@ -26,7 +26,7 @@ async function initializeServer() {
         const PORT = process.env.PORT || 3001;
         app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
     } catch (error) {
-        console.error('初始化服务器失败:', error);
+        console.error('Server initialization failed:', error);
         process.exit(1);
     }
 }

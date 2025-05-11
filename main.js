@@ -12,8 +12,12 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true
-    }
+    },
+    autoHideMenuBar: true,
+    menuBarVisible: false
   })
+
+  win.setMenu(null)
 
   if (process.env.NODE_ENV === 'development') {
     win.loadURL('http://localhost:8080')

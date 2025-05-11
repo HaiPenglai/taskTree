@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 // 数据库文件路径
-const dbPath = path.join(__dirname, '../task_tree.db');
+const dbPath = './task_tree.db'
 
 /**
  * 重置数据库
@@ -14,20 +14,20 @@ function resetDatabase(deleteExisting = false) {
   return new Promise((resolve, reject) => {
     // 如果数据库文件存在且需要删除
     if (deleteExisting && fs.existsSync(dbPath)) {
-      console.log('找到旧数据库文件，正在删除...');
+      console.log('Found old database file, deleting...');
       fs.unlinkSync(dbPath);
-      console.log('旧数据库文件已删除');
+      console.log('Old database file deleted');
     } else if (deleteExisting) {
-      console.log('未找到旧数据库文件');
+      console.log('Database file not found');
     }
 
     // 创建新的数据库连接
-    console.log('正在创建/打开数据库...');
+    console.log('Creating/opening database...');
     const db = new sqlite3.Database(dbPath);
 
     // 创建表结构
     db.serialize(() => {
-      console.log('正在创建数据表...');
+      console.log('Creating database tables...');
       
       // 用户表
       db.run(`
@@ -92,7 +92,7 @@ function resetDatabase(deleteExisting = false) {
             if (err) {
               reject(err);
             } else {
-              console.log('数据表创建完成');
+              console.log('Database tables created successfully');
               resolve(db);
             }
           });
@@ -107,11 +107,11 @@ if (require.main === module) {
   resetDatabase(true)
     .then(db => {
       db.close(() => {
-        console.log('数据库重置完成，数据库连接已关闭');
+        console.log('Database reset completed, connection closed');
       });
     })
     .catch(err => {
-      console.error('重置数据库时出错:', err);
+      console.error('Error resetting database:', err);
       process.exit(1);
     });
 }
