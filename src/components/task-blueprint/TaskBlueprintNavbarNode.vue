@@ -13,8 +13,6 @@
 </template>
 
 <script>
-import { getFormattedTime } from "../../utils/dateTimeUtils";
-
 export default {
   name: "TaskBlueprintNavbarNode",
   props: {
