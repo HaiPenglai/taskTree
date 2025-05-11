@@ -41,7 +41,7 @@ export default {
   data() {
     return {
       summaryData: [],
-      userId: 1,
+      userId: this.getCurrentUserId(),
       loadError: null,
     };
   },
@@ -49,6 +49,18 @@ export default {
     await this.loadTaskSummary();
   },
   methods: {
+    getCurrentUserId() {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          return user.id;
+        } catch (e) {
+          return 1;
+        }
+      }
+      return 1;
+    },
     async loadTaskSummary() {
       this.loadError = "Loading...";
       try {

@@ -74,7 +74,7 @@ export default {
     return {
       nodes: [rootNode],
       nodeMap: { [rootId]: rootNode },
-      userId: 1,
+      userId: this.getCurrentUserId(),
       loadError: null,
       saveTimer: null,
       selectedDate: today,
@@ -122,6 +122,18 @@ export default {
     this.saveTaskTree();
   },
   methods: {
+    getCurrentUserId() {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          return user.id;
+        } catch (e) {
+          return 1;
+        }
+      }
+      return 1;
+    },
     createNode(isRoot, parentId = null) {
       const nodeId = Date.now();
       return {

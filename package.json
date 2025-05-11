@@ -16,7 +16,8 @@
     "start": "cross-env NODE_ENV=development electron . --enable-logging",
     "pack": "cross-env NODE_ENV=production electron-builder --dir",
     "installer": "cross-env NODE_ENV=production electron-builder --win --x64",
-    "serve": "node server/taskTreeAPI.js"
+    "serve": "node server/taskTreeAPI.js",
+    "reset-db": "node -e \"require('./server/resetDatabase').resetDatabase(true).then(db => db.close())\""
   },
   "build": {
     "appId": "com.haipenglai.tasktree",
@@ -45,6 +46,7 @@
   "dependencies": {
     "@electron/get": "^4.0.0",
     "axios": "^1.6.2",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "sqlite3": "^5.1.6",

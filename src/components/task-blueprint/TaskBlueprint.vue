@@ -58,7 +58,7 @@ export default {
     return {
       nodes: [rootNode],
       nodeMap: { [rootId]: rootNode },
-      userId: 1,
+      userId: this.getCurrentUserId(),
       loadError: null,
     };
   },
@@ -87,6 +87,18 @@ export default {
   },
   emits: ['add-child', 'delete-node', 'move-node'],
   methods: {
+    getCurrentUserId() {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          return user.id;
+        } catch (e) {
+          return 1;
+        }
+      }
+      return 1;
+    },
     async loadTaskTree() {
       this.loadError = "Loading";
       try {

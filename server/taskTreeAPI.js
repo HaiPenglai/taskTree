@@ -1,6 +1,7 @@
 // server\taskTreeAPI.js
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcrypt');
+const { resetDatabase } = require('./resetDatabase');
 
 const app = express();
 app.use(express.json());
@@ -12,59 +13,23 @@ app.use(cors({
     allowedHeaders: ['Content-Type']
 }));
 
-// 数据库文件路径
-const dbPath = "./task_tree.db"
+// 初始化数据库
+let db;
 
-// 如果数据库不存在就默认创建
-const db = new sqlite3.Database(dbPath);
-
-// 如果数据表不存在就创建
-db.serialize(() => {
-    // 任务树表
-    db.run(`
-            CREATE TABLE IF NOT EXISTS user_task_trees (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                tree_date TEXT NOT NULL,
-                tree_data TEXT NOT NULL,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE (user_id, tree_date)
-            )
-        `);
-
-    // 任务树索引
-    db.run('CREATE INDEX IF NOT EXISTS idx_user_id ON user_task_trees(user_id)');
-    db.run('CREATE INDEX IF NOT EXISTS idx_tree_date ON user_task_trees(tree_date)');
-
-    // 蓝图表
-    db.run(`
-            CREATE TABLE IF NOT EXISTS user_task_blueprints (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL UNIQUE,
-                blueprint_data TEXT NOT NULL,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-    // 蓝图索引
-    db.run('CREATE INDEX IF NOT EXISTS idx_blueprint_user_id ON user_task_blueprints(user_id)');
-
-    // 创建任务摘要
-    db.run(`
-    CREATE TABLE IF NOT EXISTS user_task_summaries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        summary_date TEXT NOT NULL,
-        summary_data TEXT NOT NULL,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (user_id, summary_date)
-    )
-    `);
-
-    // 创建任务摘要索引
-    db.run('CREATE INDEX IF NOT EXISTS idx_summary_user_id ON user_task_summaries(user_id)');
-    db.run('CREATE INDEX IF NOT EXISTS idx_summary_date ON user_task_summaries(summary_date)');
-});
+// 启动函数
+async function initializeServer() {
+    try {
+        // 初始化数据库，不删除现有数据库
+        db = await resetDatabase(false);
+        
+        // 启动服务器
+        const PORT = process.env.PORT || 3001;
+        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    } catch (error) {
+        console.error('初始化服务器失败:', error);
+        process.exit(1);
+    }
+}
 
 function logRequest(method, action, params) {
     console.log(`[${new Date().toLocaleTimeString('zh-CN', { hour12: false })}] [${method} ${action}] ${Object.entries(params).map(([k,v]) => `${k} ${v}`).join(', ')}`);
@@ -82,6 +47,72 @@ function saveTaskSummary(user_id, date, nodes) {
         }
     });
 }
+
+// 用户注册API
+app.post('/api/auth/register', (req, res) => {
+    const { username, password, nickname } = req.body;
+    logRequest('POST', 'Register', { username, nickname });
+    
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: '用户名和密码不能为空' });
+    }
+    
+    db.get('SELECT id FROM users WHERE username = ?', [username], async (err, row) => {
+        if (row) {
+            return res.status(409).json({ success: false, message: '用户名已存在' });
+        }
+        
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+        
+        db.run('INSERT INTO users (username, password_hash, nickname) VALUES (?, ?, ?)',
+            [username, passwordHash, nickname || username], function(err) {
+                if (err) {
+                    return res.status(500).json({ success: false, message: '用户创建失败' });
+                }
+                
+                res.json({ 
+                    success: true, 
+                    user: { 
+                        id: this.lastID, 
+                        username, 
+                        nickname: nickname || username 
+                    } 
+                });
+            });
+    });
+});
+
+// 用户登录API
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
+    logRequest('POST', 'Login', { username });
+    
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: '用户名和密码不能为空' });
+    }
+    
+    db.get('SELECT id, username, password_hash, nickname FROM users WHERE username = ?', 
+        [username], async (err, user) => {
+            if (!user) {
+                return res.status(401).json({ success: false, message: '用户名或密码错误' });
+            }
+            
+            const match = await bcrypt.compare(password, user.password_hash);
+            if (!match) {
+                return res.status(401).json({ success: false, message: '用户名或密码错误' });
+            }
+            
+            res.json({ 
+                success: true, 
+                user: { 
+                    id: user.id, 
+                    username: user.username, 
+                    nickname: user.nickname 
+                } 
+            });
+        });
+});
 
 // 获取或创建任务树
 app.get('/api/task-tree/:user_id/:date', (req, res) => {
@@ -184,10 +215,12 @@ app.post('/api/task-blueprint/:user_id', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// 启动服务器
+initializeServer();
 
 process.on('SIGINT', () => {
-    db.close();
+    if (db) {
+        db.close();
+    }
     process.exit();
 });
