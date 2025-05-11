@@ -1,5 +1,5 @@
 <template>
-  <div class="task-summary-node">
+  <div class="task-summary-node" :class="{ 'completed': task.completed === 1 }">
     <div class="task-content">
       {{ task.text }}
     </div>
@@ -25,14 +25,31 @@ export default {
   padding: 3px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-width: 150px;
+  margin-right: 15px;
+  transition: transform 0.3s ease;
+}
+
+.task-summary-node:hover {
+  transform: translateY(-3px);
 }
 
 .task-content {
   background-color: #e8d6f0;
   padding: 10px 15px;
   border-radius: 4px;
-  color: #4a235a;
+  color: #6f3885;
   font-size: 14px;
   word-break: break-word;
+}
+
+.task-summary-node.completed {
+  background-color: #27ae60;
+  opacity: 0.8;
+}
+
+.task-summary-node.completed .task-content {
+  background-color: #d5f5e3;
+  color: #196f3d;
+  text-decoration: line-through;
 }
 </style>

@@ -5,19 +5,24 @@
     </div>
 
     <div class="content-wrapper">
-      <TaskSummarySidebar :summaryData="summaryData" @locate-day="scrollToDay" />
+      <TaskSummarySidebar 
+        :summaryData="summaryData" 
+        :activeDate="activeDate"
+        @locate-day="scrollToDay" 
+      />
       
       <div class="summary-container">
         <div 
-          v-for="(tasks, date) in summaryData" 
+          v-for="date in sortedDates" 
           :key="date" 
           class="day-container"
-          :id="`day-${date}`"
+          :id="'day-' + date"
+          :ref="el => { if (el) dayRefs[date] = el }"
         >
           <div class="date-header">{{ date }}</div>
           <div class="tasks-row">
             <TaskSummaryNode 
-              v-for="task in tasks" 
+              v-for="task in summaryData[date]" 
               :key="task.id" 
               :task="task" 
             />
@@ -40,13 +45,24 @@ export default {
   },
   data() {
     return {
-      summaryData: [],
+      summaryData: {},
       userId: this.getCurrentUserId(),
       loadError: null,
+      activeDate: '',
+      dayRefs: {}
     };
+  },
+  computed: {
+    sortedDates() {
+      return Object.keys(this.summaryData).sort().reverse();
+    }
   },
   async created() {
     await this.loadTaskSummary();
+    // 如果有数据，默认选中第一个日期
+    if (this.sortedDates.length > 0) {
+      this.activeDate = this.sortedDates[0];
+    }
   },
   methods: {
     getCurrentUserId() {
@@ -67,7 +83,14 @@ export default {
         const response = await this.$axios.get(
           `/api/task-summary/${this.userId}`
         );
-        this.summaryData = response.data;
+        
+        // 直接使用后端返回的按日期分组的数据
+        if (response.data && response.data.summariesByDate) {
+          this.summaryData = response.data.summariesByDate;
+        } else {
+          this.summaryData = {};
+        }
+        
         this.loadError = null;
       } catch (error) {
         this.loadError = "加载任务摘要失败，将使用默认摘要";
@@ -75,9 +98,17 @@ export default {
       }
     },
     scrollToDay(date) {
-      const element = document.getElementById(`day-${date}`);
+      this.activeDate = date;
+      
+      const element = this.dayRefs[date];
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" });
+        
+        // 添加高亮效果
+        element.classList.add("highlight");
+        setTimeout(() => {
+          element.classList.remove("highlight");
+        }, 2000);
       }
     }
   }
@@ -106,24 +137,32 @@ export default {
 
 .day-container {
   margin-bottom: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.day-container.highlight {
+  background-color: rgba(155, 89, 182, 0.25);
+  border-radius: 8px;
 }
 
 .date-header {
   font-size: 18px;
   font-weight: bold;
   color: #6a3093;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   padding-bottom: 5px;
   border-bottom: 2px solid #a569bd;
 }
 
 .tasks-row {
   display: flex;
-  gap: 15px;
   flex-wrap: wrap;
+  gap: 15px;
 }
 
 .loading-text {
   color: #424242;
+  padding: 20px;
+  text-align: center;
 }
 </style>

@@ -1,15 +1,13 @@
 <template>
   <div class="sidebar-container">
     <div 
-      v-for="(tasks, date) in summaryData" 
+      v-for="date in dateList" 
       :key="date" 
       class="sidebar-item"
+      :class="{ active: activeDate === date }"
       @click="$emit('locate-day', date)"
     >
-      <div class="sidebar-date">{{ date }}</div>
-      <div class="sidebar-text">
-        {{ tasks[0]?.text || "无任务" }}
-      </div>
+      <div class="sidebar-date">{{ formatDate(date) }}</div>
     </div>
   </div>
 </template>
@@ -21,15 +19,31 @@ export default {
     summaryData: {
       type: Object,
       required: true
+    },
+    activeDate: {
+      type: String,
+      default: ''
     }
   },
-  emits: ['locate-day']
+  computed: {
+    dateList() {
+      return Object.keys(this.summaryData).sort().reverse();
+    }
+  },
+  emits: ['locate-day'],
+  methods: {
+    formatDate(dateStr) {
+      const [year, month, day] = dateStr.split('-');
+      return `${month}/${day}`;
+    }
+  }
 };
 </script>
 
 <style scoped>
 .sidebar-container {
-  width: 250px;
+  width: 120px;
+  min-width: 120px;
   background-color: white;
   border-right: 2px solid #9b59b6;
   overflow-y: auto;
@@ -43,6 +57,7 @@ export default {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
 .sidebar-item:hover {
@@ -50,18 +65,15 @@ export default {
   transform: translateX(5px);
 }
 
-.sidebar-date {
-  font-size: 14px;
-  font-weight: bold;
-  color: #6a3093;
-  margin-bottom: 5px;
+.sidebar-item.active {
+  background-color: #d6b7e8;
+  transform: translateX(5px);
+  border-left: 3px solid #8e44ad;
 }
 
-.sidebar-text {
-  font-size: 13px;
-  color: #4a235a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.sidebar-date {
+  font-size: 16px;
+  font-weight: bold;
+  color: #6a3093;
 }
 </style>

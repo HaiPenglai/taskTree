@@ -36,7 +36,15 @@ function logRequest(method, action, params) {
 }
 
 function saveTaskSummary(user_id, date, nodes) {
-    const summary = nodes.map(node => ({ id: node.id, text: node.text }));
+    // 只保存没有完成的顶级任务的摘要
+    const summary = nodes
+        .filter(node => !node.hidden) // 过滤掉隐藏的任务
+        .map(node => ({ 
+            id: node.id, 
+            text: node.text,
+            completed: node.completed
+        }));
+    
     db.get('SELECT id FROM user_task_summaries WHERE user_id = ? AND summary_date = ?', [user_id, date], (_, row) => {
         if (row) {
             db.run('UPDATE user_task_summaries SET summary_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -168,8 +176,13 @@ app.get('/api/task-summary/:user_id', (req, res) => {
     logRequest('GET', 'Summary', { user: user_id });
     db.all('SELECT summary_date, summary_data FROM user_task_summaries WHERE user_id = ? ORDER BY summary_date DESC',
         [user_id], (_, rows) => {
-            const allSummaries = rows.reduce((acc, row) => acc.concat(JSON.parse(row.summary_data)), []);
-            res.json({ success: true, summaries: allSummaries });
+            // 将摘要按日期分组
+            const summariesByDate = {};
+            rows.forEach(row => {
+                const date = row.summary_date;
+                summariesByDate[date] = JSON.parse(row.summary_data);
+            });
+            res.json({ success: true, summariesByDate });
         });
 });
 
