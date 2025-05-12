@@ -8,6 +8,7 @@
       <TaskSummarySidebar 
         :summaryData="summaryData" 
         :activeDate="activeDate"
+        :timesByDate="timesByDate"
         @locate-day="scrollToDay" 
       />
       
@@ -19,12 +20,16 @@
           :id="'day-' + date"
           :ref="el => { if (el) dayRefs[date] = el }"
         >
-          <div class="date-header">{{ date }}</div>
+          <div class="date-header">
+            {{ date }} 
+            <span v-if="timesByDate[date]">{{ formatTotalTime(timesByDate[date]) }}</span>
+          </div>
           <div class="tasks-row">
             <TaskSummaryNode 
               v-for="task in summaryData[date]" 
               :key="task.id" 
               :task="task" 
+              :totalTime="timesByDate[date]"
             />
           </div>
         </div>
@@ -46,6 +51,7 @@ export default {
   data() {
     return {
       summaryData: {},
+      timesByDate: {},
       userId: this.getCurrentUserId(),
       loadError: null,
       activeDate: '',
@@ -84,11 +90,18 @@ export default {
           `/api/task-summary/${this.userId}`
         );
         
-        // 直接使用后端返回的按日期分组的数据
+        // 使用后端返回的摘要数据
         if (response.data && response.data.summariesByDate) {
           this.summaryData = response.data.summariesByDate;
         } else {
           this.summaryData = {};
+        }
+        
+        // 使用后端返回的工作时间数据
+        if (response.data && response.data.timesByDate) {
+          this.timesByDate = response.data.timesByDate;
+        } else {
+          this.timesByDate = {};
         }
         
         this.loadError = null;
@@ -110,6 +123,12 @@ export default {
           element.classList.remove("highlight");
         }, 2000);
       }
+    },
+    formatTotalTime(seconds) {
+      if (!seconds) return '';
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}:${minutes.toString().padStart(2, '0')}`;
     }
   }
 };
@@ -152,6 +171,11 @@ export default {
   margin-bottom: 15px;
   padding-bottom: 5px;
   border-bottom: 2px solid #a569bd;
+}
+
+.date-header span {
+  margin-left: 15px;
+  font-size: 16px;
 }
 
 .tasks-row {

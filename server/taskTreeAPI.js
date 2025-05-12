@@ -174,15 +174,32 @@ app.post('/api/task-tree/:user_id/:date', (req, res) => {
 app.get('/api/task-summary/:user_id', (req, res) => {
     const { user_id } = req.params;
     logRequest('GET', 'Summary', { user: user_id });
+    
+    // 获取任务摘要
     db.all('SELECT summary_date, summary_data FROM user_task_summaries WHERE user_id = ? ORDER BY summary_date DESC',
-        [user_id], (_, rows) => {
-            // 将摘要按日期分组
-            const summariesByDate = {};
-            rows.forEach(row => {
-                const date = row.summary_date;
-                summariesByDate[date] = JSON.parse(row.summary_data);
-            });
-            res.json({ success: true, summariesByDate });
+        [user_id], (err, summaryRows) => {
+            // 获取工作时间
+            db.all('SELECT work_date, total_time FROM user_work_times WHERE user_id = ? ORDER BY work_date DESC',
+                [user_id], (err, timeRows) => {
+                    // 将工作时间转换为以日期为键的对象
+                    const timesByDate = {};
+                    timeRows.forEach(row => {
+                        timesByDate[row.work_date] = row.total_time;
+                    });
+                    
+                    // 将摘要按日期分组
+                    const summariesByDate = {};
+                    summaryRows.forEach(row => {
+                        const date = row.summary_date;
+                        summariesByDate[date] = JSON.parse(row.summary_data);
+                    });
+                    
+                    res.json({ 
+                        success: true, 
+                        summariesByDate,
+                        timesByDate
+                    });
+                });
         });
 });
 
@@ -226,6 +243,44 @@ app.post('/api/task-blueprint/:user_id', (req, res) => {
         }
         res.json({ success: true });
     });
+});
+
+// 获取用户工作时间
+app.get('/api/task-time/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    logRequest('GET', 'WorkTime', { user: user_id, date });
+    
+    db.get('SELECT total_time FROM user_work_times WHERE user_id = ? AND work_date = ?', 
+        [user_id, date], (err, row) => {
+            if (row) {
+                res.json({ success: true, totalTime: row.total_time });
+            } else {
+                res.json({ success: true, totalTime: 0 });
+            }
+        });
+});
+
+// 保存用户工作时间
+app.post('/api/task-time/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    const { totalTime } = req.body;
+    logRequest('POST', 'WorkTime', { user: user_id, date, time: totalTime });
+    
+    if (totalTime === undefined) {
+        return res.status(400).json({ success: false, message: '总时间不能为空' });
+    }
+    
+    db.get('SELECT id FROM user_work_times WHERE user_id = ? AND work_date = ?', 
+        [user_id, date], (err, row) => {
+            if (row) {
+                db.run('UPDATE user_work_times SET total_time = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                    [totalTime, row.id]);
+            } else {
+                db.run('INSERT INTO user_work_times (user_id, work_date, total_time) VALUES (?, ?, ?)',
+                    [user_id, date, totalTime]);
+            }
+            res.json({ success: true });
+        });
 });
 
 // 启动服务器

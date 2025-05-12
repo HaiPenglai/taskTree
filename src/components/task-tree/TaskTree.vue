@@ -46,7 +46,10 @@
     </div>
   </div>
 
-  <input type="date" v-model="selectedDate" class="date-input" />
+  <div class="date-stats-container">
+    <input type="date" v-model="selectedDate" class="date-input" />
+    <div class="total-time">{{ formattedTotalTime }}</div>
+  </div>
 </template>
 
 
@@ -79,6 +82,7 @@ export default {
       loadError: null,
       saveTimer: null,
       selectedDate: today,
+      totalWorkTime: 0,
     };
   },
   computed: {
@@ -101,6 +105,12 @@ export default {
             new Date(a.startTime + a.elapsedTime)
         );
     },
+    formattedTotalTime() {
+      const hours = Math.floor(this.totalWorkTime / 3600);
+      const minutes = Math.floor((this.totalWorkTime % 3600) / 60);
+      const seconds = Math.floor(this.totalWorkTime % 60);
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
   },
   watch: {
     selectedDate(newDate, oldDate) {
@@ -160,6 +170,8 @@ export default {
         );
         this.nodes = response.data.nodes;
         this.buildNodeMap();
+        this.calculateTotalWorkTime();
+        
         this.loadError = null;
       } catch (error) {
         this.createDefaultTree();
@@ -168,6 +180,10 @@ export default {
     },
     async saveTaskTree() {
       if (this.loadError != null) return;
+      
+      this.calculateTotalWorkTime();
+      console.log(this.totalWorkTime);
+      
       try {
         await this.$axios.post(
           `/api/task-tree/${this.userId}/${this.selectedDate}`,
@@ -175,10 +191,56 @@ export default {
             nodes: this.nodes,
           }
         );
+        
+        await this.$axios.post(
+          `/api/task-time/${this.userId}/${this.selectedDate}`,
+          {
+            totalTime: this.totalWorkTime
+          }
+        );
+        
         this.loadError = null;
       } catch (error) {
         this.loadError = "保存任务树失败，请检查网络连接";
       }
+    },
+    calculateTotalWorkTime() {
+      const timeNodes = Object.values(this.nodeMap).filter(
+        node => node.startTime > 0 && node.elapsedTime > 0
+      );
+      
+      if (timeNodes.length === 0) {
+        this.totalWorkTime = 0;
+        return;
+      }
+      
+      let intervals = timeNodes.map(node => ({
+        start: node.startTime,
+        end: node.startTime + (node.elapsedTime * 1000)
+      }));
+      
+      intervals.sort((a, b) => a.start - b.start);
+      
+      const mergedIntervals = [intervals[0]];
+      
+      for (let i = 1; i < intervals.length; i++) {
+        const currentInterval = intervals[i];
+        const lastMergedInterval = mergedIntervals[mergedIntervals.length - 1];
+        
+        if (currentInterval.start <= lastMergedInterval.end) {
+          lastMergedInterval.end = Math.max(lastMergedInterval.end, currentInterval.end);
+        } else {
+          mergedIntervals.push(currentInterval);
+        }
+      }
+      
+      const totalTimeMs = mergedIntervals.reduce(
+        (sum, interval) => sum + (interval.end - interval.start),
+        0
+      );
+      
+      // 将毫秒转换为秒
+      this.totalWorkTime = Math.floor(totalTimeMs / 1000);
     },
     createDefaultTree() {
       const rootId = Date.now();
@@ -339,10 +401,15 @@ export default {
   color: grey;
 }
 
-.date-input {
+.date-stats-container {
   position: absolute;
   bottom: 0px;
   left: 0px;
+  display: flex;
+  align-items: center;
+}
+
+.date-input {
   width: 120px;
   padding: 4px;
   border: none;
@@ -352,6 +419,16 @@ export default {
   background-color: #b4d9fe;
   color: white;
   font-weight: bold;
+}
+
+.total-time {
+  margin-left: 10px;
+  padding: 4px 8px;
+  background-color: #4db6ac;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
 }
 </style>
 
