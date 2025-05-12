@@ -27,9 +27,10 @@
       </div>
       <div class="navbar-container">
         <TaskBlueprintNavbarNode
-          v-for="node in completedRootNodes"
+          v-for="(node, index) in completedRootNodes"
           :key="node.id"
           :node="node"
+          :index="index + 1"
           @locate-node="scrollToNode"
         />
       </div>

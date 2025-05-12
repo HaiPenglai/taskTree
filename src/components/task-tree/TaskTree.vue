@@ -36,9 +36,10 @@
         />
 
         <TaskTreeOKNode
-          v-for="node in completedNodes"
+          v-for="(node, index) in completedNodes"
           :key="node.id"
           :node="node"
+          :index="index + 1"
           @locate-node="scrollToNode"
         />
       </div>

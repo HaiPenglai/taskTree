@@ -5,7 +5,10 @@
     @click.stop="$emit('locate-node', node.id)"
   >
     {{ node.text || "已完成任务" }}
-    <div class="ok-badge">OK</div>
+    <div class="ok-badge">
+      OK
+      <span class="ok-number" v-if="index">{{ index }}</span>
+    </div>
   </button>
 </template>
 
@@ -17,6 +20,10 @@ export default {
       type: Object,
       required: true,
     },
+    index: {
+      type: Number,
+      default: null
+    }
   }
 };
 </script>
@@ -61,5 +68,13 @@ export default {
 
 .task-ok-node:hover .ok-badge {
   background-color: #2cc65a;
+}
+
+.ok-number {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  line-height: 1;
 }
 </style>

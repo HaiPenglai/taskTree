@@ -7,6 +7,7 @@
   >
     <div class="time-badge">
       {{ formattedTime }}
+      <span class="time-number" v-if="index">{{ index }}</span>
     </div>
     {{ node.text || "已完成蓝图" }}
   </button>
@@ -24,6 +25,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    index: {
+      type: Number,
+      default: null
+    }
   },
   computed: {
     formattedTime() {
@@ -73,5 +78,13 @@ export default {
 
 .task-blueprint-navbar-node:hover .time-badge {
   background-color: #a33581;
+}
+
+.time-number {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  line-height: 1;
 }
 </style>
