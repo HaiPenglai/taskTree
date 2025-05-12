@@ -30,7 +30,7 @@
           v-for="(node, index) in completedRootNodes"
           :key="node.id"
           :node="node"
-          :index="index + 1"
+          :index="completedRootNodes.length - index"
           @locate-node="scrollToNode"
         />
       </div>

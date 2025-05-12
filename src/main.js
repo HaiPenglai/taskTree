@@ -3,7 +3,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import axios from 'axios'
 
-axios.defaults.baseURL = 'http://localhost:3002'
+axios.defaults.baseURL = 'http://localhost:3003'
 
 const app = createApp(App)
 
