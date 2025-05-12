@@ -38,7 +38,6 @@ function logRequest(method, action, params) {
 function saveTaskSummary(user_id, date, nodes) {
     // 只保存没有完成的顶级任务的摘要
     const summary = nodes
-        .filter(node => !node.hidden) // 过滤掉隐藏的任务
         .map(node => ({ 
             id: node.id, 
             text: node.text,
