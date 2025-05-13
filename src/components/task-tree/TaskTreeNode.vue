@@ -180,6 +180,12 @@ export default {
     },
     hideNode() {
       this.node.hidden = 1 - this.node.hidden;
+      
+      if (this.node.hidden === 0) {
+        this.$nextTick(() => {
+          this.autoResize();
+        });
+      }
     },
   },
   beforeUnmount() {
