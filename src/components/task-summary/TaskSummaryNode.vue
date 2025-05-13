@@ -1,7 +1,8 @@
 <template>
   <div class="task-summary-node" :class="{ 'completed': task.completed === 1 }">
+    <div class="task-time" v-if="task.totalTime">{{ formatTime(task.totalTime) }}</div>
     <div class="task-content">
-      {{ task.text }}
+      <span v-if="task.completed === 1">✓ </span>{{ task.text }}
     </div>
   </div>
 </template>
@@ -13,6 +14,13 @@ export default {
     task: {
       type: Object,
       required: true
+    }
+  },
+  methods: {
+    formatTime(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
     }
   }
 };
@@ -50,6 +58,13 @@ export default {
 .task-summary-node.completed .task-content {
   background-color: #d5f5e3;
   color: #196f3d;
-  text-decoration: line-through;
+}
+
+.task-time {
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  padding: 2px 0;
+  font-weight: 500;
 }
 </style>

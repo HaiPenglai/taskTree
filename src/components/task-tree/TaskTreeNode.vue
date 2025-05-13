@@ -73,7 +73,6 @@
             @input="autoResize"
             rows="1"
             style="resize: none; overflow: hidden"
-            :disabled="node.completed != 0"
           ></textarea>
         </div>
         <button class="add-button" @click.stop="addChild">+</button>

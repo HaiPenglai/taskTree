@@ -36,13 +36,26 @@ function logRequest(method, action, params) {
 }
 
 function saveTaskSummary(user_id, date, nodes) {
-    // 只保存没有完成的顶级任务的摘要
-    const summary = nodes
-        .map(node => ({ 
-            id: node.id, 
-            text: node.text,
-            completed: node.completed
-        }));
+    // 计算节点及其所有子节点的总时间
+    function calculateTotalTime(node) {
+        let totalTime = node.elapsedTime || 0;
+        
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => {
+                totalTime += calculateTotalTime(child);
+            });
+        }
+        
+        return totalTime;
+    }
+    
+    // 保存根任务的摘要，包括完成状态和总时间
+    const summary = nodes.map(node => ({ 
+        id: node.id, 
+        text: node.text,
+        completed: node.completed,
+        totalTime: calculateTotalTime(node)
+    }));
     
     db.get('SELECT id FROM user_task_summaries WHERE user_id = ? AND summary_date = ?', [user_id, date], (_, row) => {
         if (row) {
