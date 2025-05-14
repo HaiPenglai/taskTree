@@ -49,6 +49,7 @@
   <div class="date-stats-container">
     <input type="date" v-model="selectedDate" class="date-input" />
     <div class="total-time">{{ formattedTotalTime }}</div>
+    <button class="add-root-button" @click="addRootNode">+</button>
   </div>
 </template>
 
@@ -423,12 +424,32 @@ export default {
 
 .total-time {
   margin-left: 10px;
-  padding: 4px 8px;
+  padding: 5px 8px;
   background-color: #4db6ac;
   color: white;
   border-radius: 4px;
   font-weight: bold;
   font-size: 16px;
+}
+
+.add-root-button {
+  margin-left: 10px;
+  width: 29px;
+  height: 29px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-root-button:hover {
+  background-color: #3e8e41;
 }
 </style>
 

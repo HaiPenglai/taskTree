@@ -3,11 +3,16 @@
   <button
     class="task-sidebar-node"
     @click.stop="$emit('locate-node', node.id)"
-    :class="{ active: isActive, 'snoozed': isSnoozed }"
+    :class="{ 
+      active: isActive, 
+      'snoozed': isSnoozed,
+      'root-node': isRootNode
+    }"
   >
     <div 
       class="index-badge" 
       @click.stop="toggleSnooze"
+      :class="{ 'root-badge': isRootNode }"
     >
       {{ index }}
     </div>
@@ -37,6 +42,11 @@ export default {
       isSnoozed: false
     };
   },
+  computed: {
+    isRootNode() {
+      return !this.node.parentId;
+    }
+  },
   methods: {
     toggleSnooze() {
       this.isSnoozed = !this.isSnoozed;
@@ -64,6 +74,12 @@ export default {
   text-overflow: ellipsis;
 }
 
+.task-sidebar-node.root-node {
+  background-color: #73b9e6;
+  color: #fff;
+  font-weight: bold;
+}
+
 .task-sidebar-node.snoozed {
   opacity: 0.5;
 }
@@ -84,11 +100,23 @@ export default {
   cursor: pointer;
 }
 
+.root-badge {
+  background: #1a6fb5;
+}
+
 .task-sidebar-node:hover {
   background-color: #81d4fa;
 }
 
+.task-sidebar-node.root-node:hover {
+  background-color: #4a9bd9;
+}
+
 .task-sidebar-node:hover .index-badge {
   background-color: #378fc5;
+}
+
+.task-sidebar-node:hover .root-badge {
+  background-color: #0e5a96;
 }
 </style>
