@@ -3,11 +3,16 @@
   <button
     class="task-blueprint-sidebar-node"
     @click.stop="$emit('locate-node', node.id)"
-    :class="{ active: isActive, 'snoozed': isSnoozed }"
+    :class="{ 
+      active: isActive, 
+      'snoozed': isSnoozed,
+      'root-node': isRootNode 
+    }"
   >
     <div 
       class="index-badge" 
       @click.stop="toggleSnooze"
+      :class="{ 'root-badge': isRootNode }"
     >
       {{ index }}
     </div>
@@ -37,6 +42,11 @@ export default {
       isSnoozed: false
     };
   },
+  computed: {
+    isRootNode() {
+      return !this.node.parentId;
+    }
+  },
   methods: {
     toggleSnooze() {
       this.isSnoozed = !this.isSnoozed;
@@ -64,6 +74,12 @@ export default {
   text-overflow: ellipsis;
 }
 
+.task-blueprint-sidebar-node.root-node {
+  background-color: #b294ff;
+  color: #fff;
+  font-weight: bold;
+}
+
 .task-blueprint-sidebar-node.snoozed {
   opacity: 0.5;
 }
@@ -84,11 +100,23 @@ export default {
   cursor: pointer;
 }
 
+.root-badge {
+  background: #7b54ff;
+}
+
 .task-blueprint-sidebar-node:hover {
   background-color: #d9bfff;
 }
 
+.task-blueprint-sidebar-node.root-node:hover {
+  background-color: #9b78ff;
+}
+
 .task-blueprint-sidebar-node:hover .index-badge {
   background-color: #a173fc;
+}
+
+.task-blueprint-sidebar-node:hover .root-badge {
+  background-color: #6842e6;
 }
 </style>

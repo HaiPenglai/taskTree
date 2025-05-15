@@ -8,7 +8,7 @@
     <div class="content-wrapper">
       <div class="sidebar-container">
         <TaskBlueprintSidebarNode
-          v-for="(node, index) in pendingRootNodes"
+          v-for="(node, index) in pendingNodes"
           :key="node.id"
           :node="node"
           :index="index + 1"
@@ -27,10 +27,10 @@
       </div>
       <div class="navbar-container">
         <TaskBlueprintNavbarNode
-          v-for="(node, index) in completedRootNodes"
+          v-for="(node, index) in completedNodes"
           :key="node.id"
           :node="node"
-          :index="completedRootNodes.length - index"
+          :index="completedNodes.length - index"
           @locate-node="scrollToNode"
         />
       </div>
@@ -64,11 +64,13 @@ export default {
     };
   },
   computed: {
-    pendingRootNodes() {
-      return this.nodes.filter((node) => node.completed === 0);
+    pendingNodes() {
+      return Object.values(this.nodeMap)
+        .filter((node) => node.completed === 0)
+        .sort((a, b) => a.id - b.id);
     },
-    completedRootNodes() {
-      return this.nodes
+    completedNodes() {
+      return Object.values(this.nodeMap)
         .filter((node) => node.completed === 1)
         .sort((a, b) => b.id - a.id);
     },

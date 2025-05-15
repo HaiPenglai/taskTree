@@ -3,9 +3,12 @@
   <button
     class="task-blueprint-navbar-node"
     @click.stop="$emit('locate-node', node.id)"
-    :class="{ active: isActive }"
+    :class="{ active: isActive, 'root-node': isRootNode }"
   >
-    <div class="time-badge">
+    <div 
+      class="time-badge"
+      :class="{ 'root-badge': isRootNode }"
+    >
       {{ formattedTime }}
       <span class="time-number" v-if="index">{{ index }}</span>
     </div>
@@ -34,6 +37,9 @@ export default {
     formattedTime() {
       return this.node.timeStamp.split(' ')[1] || 'OK'; // 只显示时间部分
     },
+    isRootNode() {
+      return !this.node.parentId;
+    }
   }
 };
 </script>
@@ -57,6 +63,12 @@ export default {
   text-overflow: ellipsis;
 }
 
+.task-blueprint-navbar-node.root-node {
+  background-color: #f282c2;
+  color: #fff;
+  font-weight: bold;
+}
+
 .time-badge {
   position: absolute;
   right: 0;
@@ -72,12 +84,24 @@ export default {
   border-radius: 0 4px 4px 0;
 }
 
+.root-badge {
+  background: #a33581;
+}
+
 .task-blueprint-navbar-node:hover {
   background-color: #f2b2db;
 }
 
+.task-blueprint-navbar-node.root-node:hover {
+  background-color: #e56fb4;
+}
+
 .task-blueprint-navbar-node:hover .time-badge {
   background-color: #a33581;
+}
+
+.task-blueprint-navbar-node:hover .root-badge {
+  background-color: #8e2971;
 }
 
 .time-number {

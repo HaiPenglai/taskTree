@@ -3,9 +3,13 @@
   <button
     class="task-ok-node"
     @click.stop="$emit('locate-node', node.id)"
+    :class="{ 'root-node': isRootNode }"
   >
     {{ node.text || "已完成任务" }}
-    <div class="ok-badge">
+    <div 
+      class="ok-badge"
+      :class="{ 'root-badge': isRootNode }"
+    >
       OK
       <span class="ok-number" v-if="index">{{ index }}</span>
     </div>
@@ -23,6 +27,11 @@ export default {
     index: {
       type: Number,
       default: null
+    }
+  },
+  computed: {
+    isRootNode() {
+      return !this.node.parentId;
     }
   }
 };
@@ -47,6 +56,12 @@ export default {
   text-overflow: ellipsis;
 }
 
+.task-ok-node.root-node {
+  background-color: #90edb0;
+  color: white;
+  font-weight: bold;
+}
+
 .ok-badge {
   position: absolute;
   right: 0;
@@ -62,12 +77,24 @@ export default {
   border-radius: 0 4px 4px 0;
 }
 
+.root-badge {
+  background: #2cc65a;
+}
+
 .task-ok-node:hover {
   background-color: #bfffd9;
 }
 
+.task-ok-node.root-node:hover {
+  background-color: #6dda92;
+}
+
 .task-ok-node:hover .ok-badge {
   background-color: #2cc65a;
+}
+
+.task-ok-node:hover .root-badge {
+  background-color: #1e9e46;
 }
 
 .ok-number {
