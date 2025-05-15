@@ -330,7 +330,6 @@ export default {
 }
 
 .comment-container {
-  max-width: 300px;
   margin-top: 5px;
   margin-left: 0;
 }

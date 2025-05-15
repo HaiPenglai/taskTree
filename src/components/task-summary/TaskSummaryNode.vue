@@ -1,8 +1,8 @@
 <template>
-  <div class="task-summary-node" :class="{ 'completed': task.completed === 1 }">
+  <div class="task-summary-node" :class="{ 'completed': task.completed != 0 }">
     <div class="task-time" v-if="task.totalTime">{{ formatTime(task.totalTime) }}</div>
     <div class="task-content">
-      <span v-if="task.completed === 1">✓ </span>{{ task.text }}
+      <span v-if="task.completed !=0 ">✓ </span>{{ task.text }}
     </div>
   </div>
 </template>
