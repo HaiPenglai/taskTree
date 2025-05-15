@@ -2,54 +2,74 @@
 <template>
   <button class="hide-button" @click="hideNode" v-if="node.hidden">-</button>
   <div class="task-tree-node" v-else>
-    <div
-      class="node-content"
-      :class="{
-        'completed-success': node.completed === 1,
-      }"
-      :data-node-id="node.id"
-    >
-      <button class="delete-button" @click.stop="$emit('delete-node', node.id)">
-        <span class="delete-icon">×</span>
-      </button>
-      <div class="node-main">
-        <div class="toolbar">
-          <div class="time-stamp" :class="{ completed: node.completed === 1 }">
-            {{ node.timeStamp }}
-          </div>
-          <button
-            class="complete-button"
-            @click.stop="toggleComplete"
-            :class="{ completed: node.completed === 1 }"
-          >
-            ✓
-          </button>
-          <div class="move-buttons">
-            <button class="triangle-up" @click="moveUp"></button>
-            <button class="triangle-down" @click="moveDown"></button>
-          </div>
-          <button class="hide-button" @click="hideNode">-</button>
-        </div>
-        <textarea
-          v-model="node.text"
-          ref="textarea"
-          class="node-text"
-          :placeholder="'开始规划蓝图'"
-          @focus="editing = true"
-          @blur="editing = false"
-          @input="autoResize"
-          rows="1"
-          style="resize: none; overflow: hidden"
-          :class="{ completed: node.completed === 1 }"
-        ></textarea>
-      </div>
-      <button
-        class="action-button add-button"
-        @click.stop="addChild"
-        :class="{ completed: node.completed === 1 }"
+    <div class="node-self">
+      <div
+        class="node-content"
+        :class="{
+          'completed-success': node.completed === 1,
+        }"
+        :data-node-id="node.id"
       >
-        +
-      </button>
+        <button
+          class="delete-button"
+          @click.stop="$emit('delete-node', node.id)"
+        >
+          <span class="delete-icon">×</span>
+        </button>
+        <div class="node-main">
+          <div class="toolbar">
+            <div
+              class="time-stamp"
+              :class="{ completed: node.completed === 1 }"
+            >
+              {{ node.timeStamp }}
+            </div>
+            <button
+              class="complete-button"
+              @click.stop="toggleComplete"
+              :class="{ completed: node.completed === 1 }"
+            >
+              ✓
+            </button>
+            <button
+              class="action-button comment-button"
+              @click.stop="toggleComment"
+            >
+              备注
+            </button>
+            <div class="move-buttons">
+              <button class="triangle-up" @click="moveUp"></button>
+              <button class="triangle-down" @click="moveDown"></button>
+            </div>
+            <button class="hide-button" @click="hideNode">-</button>
+          </div>
+          <textarea
+            v-model="node.text"
+            ref="textarea"
+            class="node-text"
+            :placeholder="'开始规划蓝图'"
+            @focus="editing = true"
+            @blur="editing = false"
+            @input="autoResize"
+            rows="1"
+            style="resize: none; overflow: hidden"
+            :class="{ completed: node.completed === 1 }"
+          ></textarea>
+        </div>
+        <button
+          class="action-button add-button"
+          @click.stop="addChild"
+          :class="{ completed: node.completed === 1 }"
+        >
+          +
+        </button>
+      </div>
+      <div class="comment-container">
+        <TaskBlueprintCommentNode
+          v-model:comment="node.comment"
+          :show-comment="showComment"
+        />
+      </div>
     </div>
 
     <div class="children" v-if="node.children && node.children.length > 0">
@@ -69,8 +89,13 @@
 </template>
 
 <script>
+import TaskBlueprintCommentNode from "./TaskBlueprintCommentNode.vue";
+
 export default {
   name: "TaskBlueprintNode",
+  components: {
+    TaskBlueprintCommentNode,
+  },
   props: {
     node: {
       type: Object,
@@ -80,6 +105,7 @@ export default {
   data() {
     return {
       editing: false,
+      showComment: this.node.comment ? true : false,
     };
   },
   mounted() {
@@ -109,6 +135,9 @@ export default {
     hideNode() {
       this.node.hidden = 1 - this.node.hidden;
     },
+    toggleComment() {
+      this.showComment = !this.showComment;
+    },
   },
 };
 </script>
@@ -118,6 +147,16 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.node-self {
+  display: flex;
+  align-items: flex-start;
+}
+
+.comment-container {
+  display: flex;
+  align-items: flex-start;
 }
 
 .highlight {
@@ -211,6 +250,21 @@ export default {
   transition: background 0.2s;
 }
 
+.comment-button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.comment-button:hover {
+  background: #3a7bc8;
+}
+
 .complete-button:hover {
   background: #3a7bc8;
 }
@@ -249,10 +303,17 @@ export default {
   border: none;
   color: white;
   cursor: pointer;
+  border-radius: 3px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: background 0.2s;
 }
 
 .hide-button:hover {
-  background-color: #3077c9;
+  background-color: #3a7bc8;
 }
 
 .add-button {

@@ -227,6 +227,7 @@ app.get('/api/task-blueprint/:user_id', (req, res) => {
                 id: Date.now(),
                 parentId: null,
                 text: "蓝图根节点",
+                comment: "",
                 completed: 0,
                 timeStamp: new Date().toISOString().split('T')[0],
                 hidden: 0,

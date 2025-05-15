@@ -153,6 +153,7 @@ export default {
         id: nodeId,
         parentId: parentId,
         text: "",
+        comment: "",
         completed: 0,
         timeStamp: getFormattedDate(),
         hidden: 0,
