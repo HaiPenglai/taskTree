@@ -34,6 +34,7 @@
             <button
               class="action-button comment-button"
               @click.stop="toggleComment"
+              :class="{ 'has-comment': node.comment }"
             >
               备注
             </button>
@@ -261,8 +262,17 @@ export default {
   transition: background 0.2s;
 }
 
+.comment-button.has-comment {
+  background: #3a7bc8;
+  font-weight: bold;
+}
+
 .comment-button:hover {
   background: #3a7bc8;
+}
+
+.comment-button.has-comment:hover {
+  background: #2a6cb8;
 }
 
 .complete-button:hover {

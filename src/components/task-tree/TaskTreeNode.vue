@@ -54,6 +54,7 @@
             <button
               class="action-button comment-button"
               @click.stop="toggleComment"
+              :class="{ 'has-comment': node.comment }"
             >
               批注
             </button>
@@ -339,8 +340,17 @@ export default {
   color: white;
 }
 
+.comment-button.has-comment {
+  background: #26a69a;
+  font-weight: bold;
+}
+
 .comment-button:hover:not(:disabled) {
   background: #26a69a;
+}
+
+.comment-button.has-comment:hover:not(:disabled) {
+  background: #00897b;
 }
 
 .move-buttons {
