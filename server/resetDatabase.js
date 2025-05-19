@@ -110,6 +110,20 @@ async function resetDatabase(forceReset = false) {
       )
     `);
 
+    // 创建休息清单表
+    await runQuery(db, `
+      CREATE TABLE IF NOT EXISTS user_rest_lists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        rest_date TEXT NOT NULL,
+        rest_data TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, rest_date)
+      )
+    `);
+
     // 如果强制重置，插入默认用户
     if (forceReset) {
       for (const user of defaultUsers) {

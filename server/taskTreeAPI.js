@@ -296,6 +296,47 @@ app.post('/api/task-time/:user_id/:date', (req, res) => {
         });
 });
 
+// 获取休息清单
+app.get('/api/rest-list/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    logRequest('GET', 'RestList', { user: user_id, date });
+    
+    db.get('SELECT rest_data FROM user_rest_lists WHERE user_id = ? AND rest_date = ?', 
+        [user_id, date], (_, row) => {
+            if (row) {
+                res.json({ success: true, restList: JSON.parse(row.rest_data) });
+            } else {
+                const defaultRestList = [{
+                    id: Date.now(),
+                    text: "休息一下",
+                    restTime: 0
+                }];
+                db.run('INSERT INTO user_rest_lists (user_id, rest_date, rest_data) VALUES (?, ?, ?)',
+                    [user_id, date, JSON.stringify(defaultRestList)]);
+                res.json({ success: true, restList: defaultRestList });
+            }
+        });
+});
+
+// 保存休息清单
+app.post('/api/rest-list/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    logRequest('POST', 'RestList', { user: user_id, date });
+    const { restList } = req.body;
+    
+    db.get('SELECT id FROM user_rest_lists WHERE user_id = ? AND rest_date = ?', 
+        [user_id, date], (_, row) => {
+            if (row) {
+                db.run('UPDATE user_rest_lists SET rest_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                    [JSON.stringify(restList), row.id]);
+            } else {
+                db.run('INSERT INTO user_rest_lists (user_id, rest_date, rest_data) VALUES (?, ?, ?)',
+                    [user_id, date, JSON.stringify(restList)]);
+            }
+            res.json({ success: true });
+        });
+});
+
 // 启动服务器
 initializeServer();
 

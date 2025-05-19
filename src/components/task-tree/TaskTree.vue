@@ -16,7 +16,7 @@
           @locate-node="scrollToNode"
         />
       </div>
-      <div class="task-tree-container" @dblclick="handleContainerDoubleClick">
+      <div class="task-tree-container" @dblclick="handleContainerDoubleClick" @contextmenu.prevent="toggleRestList">
         <TaskTreeNode
           v-for="node in nodes"
           :key="node.id"
@@ -25,6 +25,7 @@
           @delete-node="deleteNode"
           @move-node="moveNode"
         />
+        <RestList :user-id="userId" :date="selectedDate" v-model:visible="restListVisible" :position="restListPosition" />
       </div>
 
       <div class="navbar-container">
@@ -50,6 +51,7 @@
     <input type="date" v-model="selectedDate" class="date-input" />
     <div class="total-time">{{ formattedTotalTime }}</div>
     <button class="add-root-button" @click="addRootNode">+</button>
+    <button class="add-rest-button" @click="showRestList">休</button>
   </div>
 </template>
 
@@ -61,6 +63,7 @@ import TaskTreeProgressBar from "./TaskTreeProgressBar.vue";
 import TaskTreeNavbarNode from "./TaskTreeNavbarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
 import TaskTreeOKNode from "./TaskTreeOKNode.vue";
+import RestList from "../rest-list/RestList.vue";
 
 export default {
   name: "TaskTree",
@@ -70,6 +73,7 @@ export default {
     TaskTreeProgressBar,
     TaskTreeNavbarNode,
     TaskTreeOKNode,
+    RestList,
   },
   data() {
     const today = getFormattedDate();
@@ -84,6 +88,8 @@ export default {
       saveTimer: null,
       selectedDate: today,
       totalWorkTime: 0,
+      restListVisible: false,
+      restListPosition: { x: 0, y: 0 },
     };
   },
   computed: {
@@ -357,6 +363,21 @@ export default {
         }, 5000);
       }
     },
+    toggleRestList(event) {
+      this.restListPosition = {
+        x: event.clientX,
+        y: event.clientY
+      };
+      this.restListVisible = !this.restListVisible;
+    },
+    showRestList() {
+      // 在屏幕中央显示
+      this.restListPosition = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+      };
+      this.restListVisible = true;
+    },
   },
 };
 </script>
@@ -450,6 +471,26 @@ export default {
 
 .add-root-button:hover {
   background-color: #3e8e41;
+}
+
+.add-rest-button {
+  margin-left: 10px;
+  width: 29px;
+  height: 29px;
+  background-color: #ff69b4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-rest-button:hover {
+  background-color: #ff1493;
 }
 </style>
 

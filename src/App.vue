@@ -9,9 +9,26 @@
       <TaskSummary v-else-if="activeView === 'summary'" />
 
       <div class="app-controls">
-        <button class="view-switcher" @click="switchView">
-          {{ switchButtonText }}
-          <span style="font-size: 9px; font-weight: bold;">F2</span>
+        <button 
+          class="view-button tree-button" 
+          :class="{ active: activeView === 'tree' }"
+          @click="setView('tree')"
+        >
+          任务树
+        </button>
+        <button 
+          class="view-button blueprint-button" 
+          :class="{ active: activeView === 'blueprint' }"
+          @click="setView('blueprint')"
+        >
+          任务蓝图
+        </button>
+        <button 
+          class="view-button summary-button" 
+          :class="{ active: activeView === 'summary' }"
+          @click="setView('summary')"
+        >
+          任务摘要
         </button>
         
         <button class="logout-button" @click="logout">
@@ -73,14 +90,14 @@ export default {
     window.removeEventListener("keydown", this.handleKeyPress);
   },
   methods: {
-    switchView() {
-      const currentIndex = this.viewOrder.indexOf(this.activeView);
-      const nextIndex = (currentIndex + 1) % this.viewOrder.length;
-      this.activeView = this.viewOrder[nextIndex];
+    setView(view) {
+      this.activeView = view;
     },
     handleKeyPress(event) {
       if (event.key === "F2" && this.isAuthenticated) {
-        this.switchView();
+        const currentIndex = this.viewOrder.indexOf(this.activeView);
+        const nextIndex = (currentIndex + 1) % this.viewOrder.length;
+        this.activeView = this.viewOrder[nextIndex];
       }
     },
     handleAuthSuccess(user) {
@@ -115,9 +132,8 @@ body {
   /* padding: 10px; */
 }
 
-.view-switcher {
-  padding: 5px 5px;
-  background-color: rgb(149, 226, 121);
+.view-button {
+  padding: 5px 10px;
   color: white;
   border: none;
   border-radius: 4px;
@@ -127,8 +143,49 @@ body {
   transition: all 0.3s ease;
 }
 
-.view-switcher:hover {
+.view-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tree-button {
+  background-color: rgb(149, 226, 121);
+}
+
+.tree-button:hover {
   background-color: #6fcb5d;
+}
+
+.tree-button.active {
+  background-color: #4caf50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.blueprint-button {
+  background-color: #87ceeb;
+}
+
+.blueprint-button:hover {
+  background-color: #5f9eb3;
+}
+
+.blueprint-button.active {
+  background-color: #4682b4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.summary-button {
+  background-color: #d8bfd8;
+}
+
+.summary-button:hover {
+  background-color: #b19cd9;
+}
+
+.summary-button.active {
+  background-color: #9370db;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
