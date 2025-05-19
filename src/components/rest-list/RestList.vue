@@ -61,7 +61,14 @@ export default {
   },
   data() {
     return {
-      restList: [],
+      restList: [{
+        id: Date.now(),
+        text: "休息一下",
+        restTime: 0,
+        waitTime: 10,
+        remainingTime: 0,
+        timer: null
+      }],
     };
   },
   computed: {
@@ -114,6 +121,9 @@ export default {
         id: Date.now(),
         text: "",
         restTime: 0,
+        waitTime: 10,
+        remainingTime: 0,
+        timer: null
       };
       this.restList.push(newNode);
     },

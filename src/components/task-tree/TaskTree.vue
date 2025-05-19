@@ -52,7 +52,16 @@
     <div class="total-time">{{ formattedTotalTime }}</div>
     <button class="add-root-button" @click="addRootNode">+</button>
     <button class="add-rest-button" @click="showRestList">休</button>
+    <button class="add-calendar-button" @click="showCalendar">日</button>
   </div>
+
+  <Calendar
+    ref="calendar"
+    :user-id="userId"
+    :selected-date="selectedDate"
+    v-model:visible="calendarVisible"
+    @trigger-calendar="handleCalendarTrigger"
+  />
 </template>
 
 
@@ -64,6 +73,7 @@ import TaskTreeNavbarNode from "./TaskTreeNavbarNode.vue";
 import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
 import TaskTreeOKNode from "./TaskTreeOKNode.vue";
 import RestList from "../rest-list/RestList.vue";
+import Calendar from "../calendar/Calendar.vue";
 
 export default {
   name: "TaskTree",
@@ -74,6 +84,7 @@ export default {
     TaskTreeNavbarNode,
     TaskTreeOKNode,
     RestList,
+    Calendar,
   },
   data() {
     const today = getFormattedDate();
@@ -90,6 +101,7 @@ export default {
       totalWorkTime: 0,
       restListVisible: false,
       restListPosition: { x: 0, y: 0 },
+      calendarVisible: false,
     };
   },
   computed: {
@@ -123,6 +135,7 @@ export default {
     selectedDate(newDate, oldDate) {
       if (newDate !== oldDate) {
         this.loadTaskTree();
+        this.calendarVisible = false;  // 切换日期时关闭日历
       }
     },
   },
@@ -205,6 +218,11 @@ export default {
             totalTime: this.totalWorkTime
           }
         );
+        
+        // 检查日历触发
+        if (this.$refs.calendar) {
+          this.$refs.calendar.checkTriggers();
+        }
         
         this.loadError = null;
       } catch (error) {
@@ -378,6 +396,14 @@ export default {
       };
       this.restListVisible = true;
     },
+    showCalendar() {
+      this.calendarVisible = true;
+    },
+    handleCalendarTrigger(node) {
+      // 当日历被触发时，显示通知
+      alert(`日历提醒：${node.text}`);
+      node.isCompleted = true;
+    },
   },
 };
 </script>
@@ -491,6 +517,26 @@ export default {
 
 .add-rest-button:hover {
   background-color: #ff1493;
+}
+
+.add-calendar-button {
+  margin-left: 10px;
+  width: 29px;
+  height: 29px;
+  background-color: #ff8c00;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-calendar-button:hover {
+  background-color: #ff6b00;
 }
 </style>
 

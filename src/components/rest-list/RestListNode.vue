@@ -78,7 +78,6 @@ export default {
     this.$nextTick(() => {
       this.autoResize();
     });
-    window.addEventListener('keydown', this.handleKeyPress);
   },
   beforeUnmount() {
     if (this.timerInterval) {
@@ -87,7 +86,6 @@ export default {
     if (this.waitInterval) {
       clearInterval(this.waitInterval);
     }
-    window.removeEventListener('keydown', this.handleKeyPress);
   },
   methods: {
     autoResize() {
@@ -112,11 +110,6 @@ export default {
       const minutes = Math.floor((seconds % 3600) / 60);
       const secs = seconds % 60;
       return `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-    },
-    handleKeyPress(event) {
-      if (event.key === 'Escape') {
-        this.$emit('delete-node', this.node.id);
-      }
     },
     startWaiting() {
       if (this.isWaiting || !this.waitMinutes || this.waitMinutes < 1) return;
@@ -283,8 +276,8 @@ export default {
 
 .delete-button {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -8px;
+  right: -8px;
   width: 22px;
   height: 22px;
   border-bottom-left-radius: 100%;
@@ -302,6 +295,7 @@ export default {
 }
 
 .delete-icon {
+  font-size: 23px;
   line-height: 1;
   margin-top: -2px;
 }
