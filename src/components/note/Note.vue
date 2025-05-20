@@ -130,9 +130,9 @@ export default {
 }
 .note-textarea {
   width: 100%;
-  height: 180px;
-  min-height: 180px;
-  max-height: 260px;
+  height: 480px;
+  min-height: 380px;
+  max-height: 560px;
   resize: none;
   border: none;
   outline: none;
