@@ -337,6 +337,34 @@ app.post('/api/rest-list/:user_id/:date', (req, res) => {
         });
 });
 
+// 获取用户笔记
+app.get('/api/note/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    logRequest('GET', 'Note', { user: user_id, date });
+    db.get('SELECT note_content FROM user_notes WHERE user_id = ? AND note_date = ?', [user_id, date], (err, row) => {
+        if (row) {
+            res.json({ success: true, note: row.note_content });
+        } else {
+            res.json({ success: true, note: '' });
+        }
+    });
+});
+
+// 保存用户笔记
+app.post('/api/note/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    const { note } = req.body;
+    logRequest('POST', 'Note', { user: user_id, date });
+    db.get('SELECT id FROM user_notes WHERE user_id = ? AND note_date = ?', [user_id, date], (err, row) => {
+        if (row) {
+            db.run('UPDATE user_notes SET note_content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [note, row.id]);
+        } else {
+            db.run('INSERT INTO user_notes (user_id, note_date, note_content) VALUES (?, ?, ?)', [user_id, date, note]);
+        }
+        res.json({ success: true });
+    });
+});
+
 // 启动服务器
 initializeServer();
 

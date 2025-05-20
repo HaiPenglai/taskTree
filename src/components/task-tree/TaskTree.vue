@@ -16,7 +16,7 @@
           @locate-node="scrollToNode"
         />
       </div>
-      <div class="task-tree-container" @dblclick="handleContainerDoubleClick" @contextmenu.prevent="toggleRestList">
+      <div class="task-tree-container" @dblclick="handleContainerDoubleClick" @contextmenu.prevent="toggleRestList" @mousedown="handleContainerClick">
         <TaskTreeNode
           v-for="node in nodes"
           :key="node.id"
@@ -53,6 +53,7 @@
     <button class="add-root-button" @click="addRootNode">+</button>
     <button class="add-rest-button" @click="showRestList">休</button>
     <button class="add-calendar-button" @click="showCalendar">日</button>
+    <button class="add-note-button" @click="toggleNoteCenter">记</button>
   </div>
 
   <Calendar
@@ -62,6 +63,8 @@
     v-model:visible="calendarVisible"
     @trigger-calendar="handleCalendarTrigger"
   />
+
+  <Note :user-id="userId" :date="selectedDate" v-model:visible="noteVisible" :position="notePosition" />
 </template>
 
 
@@ -74,6 +77,7 @@ import { getFormattedDate, getFormattedTime } from "../../utils/dateTimeUtils";
 import TaskTreeOKNode from "./TaskTreeOKNode.vue";
 import RestList from "../rest-list/RestList.vue";
 import Calendar from "../calendar/Calendar.vue";
+import Note from "../note/Note.vue";
 
 export default {
   name: "TaskTree",
@@ -85,6 +89,7 @@ export default {
     TaskTreeOKNode,
     RestList,
     Calendar,
+    Note,
   },
   data() {
     const today = getFormattedDate();
@@ -102,6 +107,8 @@ export default {
       restListVisible: false,
       restListPosition: { x: 0, y: 0 },
       calendarVisible: false,
+      noteVisible: false,
+      notePosition: { x: 0, y: 0 },
     };
   },
   computed: {
@@ -404,6 +411,30 @@ export default {
       alert(`日历提醒：${node.text}`);
       node.isCompleted = true;
     },
+    toggleNoteCenter() {
+      if (this.noteVisible) {
+        this.noteVisible = false;
+      } else {
+        this.notePosition = {
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
+        };
+        this.noteVisible = true;
+        this.restListVisible = false;
+        this.calendarVisible = false;
+      }
+    },
+    handleContainerClick(event) {
+      // 只处理中键
+      if (event.button !== 1) return;
+      this.notePosition = {
+        x: event.clientX,
+        y: event.clientY
+      };
+      this.noteVisible = !this.noteVisible;
+      this.restListVisible = false;
+      this.calendarVisible = false;
+    },
   },
 };
 </script>
@@ -523,7 +554,7 @@ export default {
   margin-left: 10px;
   width: 29px;
   height: 29px;
-  background-color: #ff8c00;
+  background-color: #ffa12e;
   color: white;
   border: none;
   border-radius: 4px;
@@ -537,6 +568,26 @@ export default {
 
 .add-calendar-button:hover {
   background-color: #ff6b00;
+}
+
+.add-note-button {
+  margin-left: 10px;
+  width: 29px;
+  height: 29px;
+  background-color: #f92a76;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-note-button:hover {
+  background-color: #eb0066;
 }
 </style>
 

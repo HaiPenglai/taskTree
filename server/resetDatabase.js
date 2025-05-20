@@ -124,6 +124,19 @@ async function resetDatabase(forceReset = false) {
       )
     `);
 
+    // 创建笔记表
+    await runQuery(db, `
+      CREATE TABLE IF NOT EXISTS user_notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        note_date TEXT NOT NULL,
+        note_content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, note_date)
+      )
+    `);
+
     // 如果强制重置，插入默认用户
     if (forceReset) {
       for (const user of defaultUsers) {

@@ -276,14 +276,14 @@ export default {
 
 .delete-button {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: 0px;
+  right: 0px;
   width: 22px;
   height: 22px;
   border-bottom-left-radius: 100%;
+  background-color: #ff69b4;
   border: none;
-  color: rgb(182, 180, 180);
-  background-color: transparent;
+  color: white;
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -294,9 +294,13 @@ export default {
   transition: background-color 0.2s ease;
 }
 
+.delete-button:hover {
+  background-color: #ff1493;
+}
+
 .delete-icon {
-  font-size: 23px;
   line-height: 1;
-  margin-top: -2px;
+  margin-top: -5px;
+  margin-right: -5px;
 }
 </style> 
