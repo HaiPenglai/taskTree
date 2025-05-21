@@ -179,8 +179,8 @@ export default {
         parentId: parentId,
         text: "",
         comment: "",
-        estimatedTime: isRoot ? 75 : 25,
-        remainingTime: (isRoot ? 75 : 25) * 60,
+        estimatedTime: isRoot ? 99 : 99,
+        remainingTime: (isRoot ? 99 : 99) * 60,
         startTime: 0,
         elapsedTime: 0,
         completed: 0,
@@ -396,15 +396,19 @@ export default {
       this.restListVisible = !this.restListVisible;
     },
     showRestList() {
-      // 在屏幕中央显示
-      this.restListPosition = {
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2
-      };
-      this.restListVisible = true;
+      if (this.restListVisible) {
+        this.restListVisible = false;
+      } else {
+        // 在屏幕中央显示
+        this.restListPosition = {
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
+        };
+        this.restListVisible = true;
+      }
     },
     showCalendar() {
-      this.calendarVisible = true;
+      this.calendarVisible = !this.calendarVisible;
     },
     handleCalendarTrigger(node) {
       // 当日历被触发时，显示通知

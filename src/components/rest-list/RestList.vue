@@ -22,7 +22,7 @@
     </div>
     <div class="rest-list-content">
       <RestListNode
-        v-for="node in restList"
+        v-for="node in sortedRestList"
         :key="node.id"
         :node="node"
         @delete-node="deleteNode"
@@ -67,11 +67,20 @@ export default {
         restTime: 0,
         waitTime: 10,
         remainingTime: 0,
-        timer: null
+        timer: null,
+        completed: false
       }],
     };
   },
   computed: {
+    sortedRestList() {
+      return [...this.restList].sort((a, b) => {
+        // 已完成的节点排在后面
+        if (a.completed && !b.completed) return 1;
+        if (!a.completed && b.completed) return -1;
+        return 0;
+      });
+    },
     formatTotalTime() {
       const totalSeconds = this.restList.reduce((sum, node) => sum + node.restTime, 0);
       const hours = Math.floor(totalSeconds / 3600);
@@ -123,7 +132,8 @@ export default {
         restTime: 0,
         waitTime: 10,
         remainingTime: 0,
-        timer: null
+        timer: null,
+        completed: false
       };
       this.restList.push(newNode);
     },

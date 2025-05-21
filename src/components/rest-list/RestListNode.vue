@@ -1,6 +1,6 @@
 <!-- src\components\rest-list\RestListNode.vue -->
 <template>
-  <div class="rest-list-node">
+  <div class="rest-list-node" :class="{ 'completed': node.completed }">
     <div class="node-content">
       <div class="node-footer">
         <div class="footer-left">
@@ -9,7 +9,7 @@
             class="action-button timer-button"
             @click="toggleTimer"
             :class="{ 'timer-running': timerRunning }"
-            :disabled="isWaiting"
+            :disabled="isWaiting || node.completed"
           >
             {{ timerRunning ? '暂停' : '开始' }}
           </button>
@@ -23,15 +23,22 @@
             min="1"
             max="120"
             placeholder="10"
-            :disabled="isWaiting"
+            :disabled="isWaiting || node.completed"
           />
           <button
             class="action-button wait-button"
             @click="startWaiting"
-            :disabled="isWaiting || !waitMinutes || waitMinutes < 1"
+            :disabled="isWaiting || !waitMinutes || waitMinutes < 1 || node.completed"
             :class="{ 'waiting': isWaiting }"
           >
             {{ isWaiting ? `${remainingWaitMinutes}:${remainingWaitSeconds < 10 ? '0' : ''}${remainingWaitSeconds}` : '等待' }}
+          </button>
+          <button
+            class="action-button complete-button"
+            @click="toggleComplete"
+            :class="{ 'completed': node.completed }"
+          >
+            {{ node.completed ? '✓' : '完成' }}
           </button>
         </div>
       </div>
@@ -139,6 +146,19 @@ export default {
       if (this.waitInterval) {
         clearInterval(this.waitInterval);
         this.waitInterval = null;
+      }
+    },
+    toggleComplete() {
+      this.node.completed = !this.node.completed;
+      if (this.node.completed) {
+        this.stopTimer();
+        this.stopWaiting();
+      }
+    },
+    stopTimer() {
+      if (this.timerRunning) {
+        clearInterval(this.timerInterval);
+        this.timerRunning = false;
       }
     },
   },
@@ -302,5 +322,33 @@ export default {
   line-height: 1;
   margin-top: -5px;
   margin-right: -5px;
+}
+
+.completed {
+  opacity: 0.5;
+}
+
+.complete-button {
+  background: #ff69b4;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.complete-button:hover {
+  background: #ff1493;
+}
+
+.complete-button.completed {
+  background: #fb98b4;
+  opacity: 1;
+}
+
+.complete-button.completed:hover {
+  background: #ee90c2;
 }
 </style> 
