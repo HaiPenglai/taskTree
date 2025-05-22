@@ -35,6 +35,7 @@
         @input="autoResize"
         rows="1"
         style="resize: none; overflow: hidden"
+        spellcheck="false"
       ></textarea>
     </div>
     <button class="delete-button" @click="$emit('delete-node', node.id)">

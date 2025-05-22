@@ -55,6 +55,7 @@
             rows="1"
             style="resize: none; overflow: hidden"
             :class="{ completed: node.completed === 1 }"
+            spellcheck="false"
           ></textarea>
         </div>
         <button

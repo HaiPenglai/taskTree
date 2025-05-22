@@ -11,6 +11,7 @@
       v-model="noteContent"
       placeholder="今天的笔记..."
       @input="saveNote"
+      spellcheck="false"
     ></textarea>
   </div>
 </template>
