@@ -140,6 +140,20 @@ async function resetDatabase(forceReset = false) {
       )
     `);
 
+    // 创建日历表
+    await runQuery(db, `
+      CREATE TABLE IF NOT EXISTS user_calendar (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        calendar_date TEXT NOT NULL,
+        calendar_nodes TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, calendar_date)
+      )
+    `);
+
     // 如果强制重置，插入默认用户
     if (forceReset) {
       for (const user of defaultUsers) {

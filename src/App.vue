@@ -177,11 +177,11 @@ body {
 }
 
 .summary-button {
-  background-color: #d8bfd8;
+  background-color: #d29fd2;
 }
 
 .summary-button:hover {
-  background-color: #b19cd9;
+  background-color: #a086d0;
 }
 
 .summary-button.active {

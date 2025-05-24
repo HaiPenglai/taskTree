@@ -462,6 +462,62 @@ app.post('/api/note/:user_id/:date', (req, res) => {
         });
 });
 
+// 获取用户日历
+app.get('/api/calendar/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    logRequest('GET', 'Calendar', { user: user_id, date });
+    
+    db.get('SELECT calendar_nodes FROM user_calendar WHERE user_id = ? AND calendar_date = ?', 
+        [user_id, date], (err, row) => {
+            if (err) {
+                console.error('Error fetching calendar:', err);
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            if (row) {
+                res.json({ success: true, calendarNodes: JSON.parse(row.calendar_nodes) });
+            } else {
+                // 如果没有找到日历数据，返回默认的空数组
+                res.json({ success: true, calendarNodes: [] });
+            }
+        });
+});
+
+// 保存用户日历
+app.post('/api/calendar/:user_id/:date', (req, res) => {
+    const { user_id, date } = req.params;
+    const { calendarNodes } = req.body;
+    logRequest('POST', 'Calendar', { user: user_id, date });
+    
+    if (!calendarNodes) {
+        return res.status(400).json({ success: false, message: '日历数据不能为空' });
+    }
+    
+    db.get('SELECT id FROM user_calendar WHERE user_id = ? AND calendar_date = ?', 
+        [user_id, date], (err, row) => {
+            if (err) {
+                console.error('Error checking calendar:', err);
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            const query = row ?
+                'UPDATE user_calendar SET calendar_nodes = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND calendar_date = ?' :
+                'INSERT INTO user_calendar (user_id, calendar_date, calendar_nodes) VALUES (?, ?, ?)';
+            
+            const params = row ?
+                [JSON.stringify(calendarNodes), user_id, date] :
+                [user_id, date, JSON.stringify(calendarNodes)];
+            
+            db.run(query, params, (err) => {
+                if (err) {
+                    console.error('Error saving calendar:', err);
+                    return res.status(500).json({ success: false, error: err.message });
+                }
+                res.json({ success: true });
+            });
+        });
+});
+
 // 启动服务器
 initializeServer();
 

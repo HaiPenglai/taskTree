@@ -93,7 +93,7 @@ export default {
   methods: {
     async loadCalendar() {
       try {
-        const response = await axios.get(`/api/calendar/${this.userId}`);
+        const response = await axios.get(`/api/calendar/${this.userId}/${this.selectedDate}`);
         if (response.data.success) {
           this.calendarNodes = response.data.calendarNodes;
         }
@@ -103,7 +103,7 @@ export default {
     },
     async saveCalendar() {
       try {
-        await axios.post(`/api/calendar/${this.userId}`, {
+        await axios.post(`/api/calendar/${this.userId}/${this.selectedDate}`, {
           calendarNodes: this.calendarNodes,
         });
       } catch (error) {

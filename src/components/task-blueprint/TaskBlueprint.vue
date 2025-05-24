@@ -238,7 +238,7 @@ export default {
       this.nodeMap = map;
     },
     
-    async f() {
+    async createDefaultTree() {
       const rootId = Date.now();
       const rootNode = {
         id: rootId,
