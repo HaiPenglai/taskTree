@@ -12,7 +12,7 @@
         @locate-day="scrollToDay" 
       />
       
-      <div class="summary-container">
+      <div class="summary-container" ref="summaryContainer" @scroll="handleScroll">
         <div 
           v-for="date in sortedDates" 
           :key="date" 
@@ -33,6 +33,8 @@
             />
           </div>
         </div>
+        <div v-if="isLoading" class="loading-more">加载更多...</div>
+        <div v-if="!hasMore && sortedDates.length > 0" class="no-more-data">没有更多数据了</div>
       </div>
     </div>
   </div>
@@ -55,7 +57,10 @@ export default {
       userId: this.getCurrentUserId(),
       loadError: null,
       activeDate: '',
-      dayRefs: {}
+      dayRefs: {},
+      currentPage: 1,
+      hasMore: true,
+      isLoading: false
     };
   },
   computed: {
@@ -83,31 +88,49 @@ export default {
       }
       return 1;
     },
-    async loadTaskSummary() {
-      this.loadError = "Loading...";
+    async loadTaskSummary(page = 1) {
+      if (page === 1) {
+        this.loadError = "Loading...";
+      }
+      
+      if (this.isLoading || (!this.hasMore && page > 1)) {
+        return;
+      }
+      
+      this.isLoading = true;
+      
       try {
         const response = await this.$axios.get(
-          `/api/task-summary/${this.userId}`
+          `/api/task-summary/${this.userId}?page=${page}`
         );
         
-        // 使用后端返回的摘要数据
         if (response.data && response.data.summariesByDate) {
-          this.summaryData = response.data.summariesByDate;
-        } else {
-          this.summaryData = {};
-        }
-        
-        // 使用后端返回的工作时间数据
-        if (response.data && response.data.timesByDate) {
-          this.timesByDate = response.data.timesByDate;
-        } else {
-          this.timesByDate = {};
+          if (page === 1) {
+            this.summaryData = response.data.summariesByDate;
+            this.timesByDate = response.data.timesByDate;
+          } else {
+            // 合并新数据
+            this.summaryData = {
+              ...this.summaryData,
+              ...response.data.summariesByDate
+            };
+            this.timesByDate = {
+              ...this.timesByDate,
+              ...response.data.timesByDate
+            };
+          }
+          
+          // 更新分页信息
+          this.hasMore = response.data.pagination.hasMore;
+          this.currentPage = response.data.pagination.page;
         }
         
         this.loadError = null;
       } catch (error) {
         this.loadError = "加载任务摘要失败，将使用默认摘要";
         console.error("Error loading task summary:", error);
+      } finally {
+        this.isLoading = false;
       }
     },
     scrollToDay(date) {
@@ -129,6 +152,15 @@ export default {
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
       return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    },
+    handleScroll(event) {
+      const container = event.target;
+      const scrollBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      
+      // 当滚动到距离底部100px时加载更多
+      if (scrollBottom < 100 && !this.isLoading && this.hasMore) {
+        this.loadTaskSummary(this.currentPage + 1);
+      }
     }
   }
 };
@@ -188,5 +220,20 @@ export default {
   color: #424242;
   padding: 20px;
   text-align: center;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 20px;
+  color: #6a3093;
+  font-size: 14px;
+}
+
+.no-more-data {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 14px;
+  font-style: italic;
 }
 </style>

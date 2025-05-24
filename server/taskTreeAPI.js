@@ -23,7 +23,7 @@ async function initializeServer() {
         db = await resetDatabase(false);
         
         // 启动服务器
-        const PORT = process.env.PORT || 3001;
+        const PORT = process.env.PORT || 3002;
         app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}, accessible from all interfaces`));
     } catch (error) {
         console.error('Server initialization failed:', error);
@@ -185,31 +185,66 @@ app.post('/api/task-tree/:user_id/:date', (req, res) => {
 
 app.get('/api/task-summary/:user_id', (req, res) => {
     const { user_id } = req.params;
-    logRequest('GET', 'Summary', { user: user_id });
+    const { page = 1 } = req.query;
+    const pageSize = 10;
+    logRequest('GET', 'Summary', { user: user_id, page });
     
-    // 获取任务摘要
-    db.all('SELECT summary_date, summary_data FROM user_task_summaries WHERE user_id = ? ORDER BY summary_date DESC',
-        [user_id], (err, summaryRows) => {
-            // 获取工作时间
-            db.all('SELECT work_date, total_time FROM user_work_times WHERE user_id = ? ORDER BY work_date DESC',
-                [user_id], (err, timeRows) => {
-                    // 将工作时间转换为以日期为键的对象
-                    const timesByDate = {};
-                    timeRows.forEach(row => {
-                        timesByDate[row.work_date] = row.total_time;
-                    });
+    // 获取任务摘要，使用分页
+    db.all(`
+        SELECT summary_date, summary_data 
+        FROM user_task_summaries 
+        WHERE user_id = ? 
+        ORDER BY summary_date DESC
+        LIMIT ? OFFSET ?`,
+        [user_id, pageSize, (page - 1) * pageSize], 
+        (err, summaryRows) => {
+            if (err) {
+                return res.status(500).json({ success: false, error: err.message });
+            }
+
+            // 获取总记录数
+            db.get('SELECT COUNT(*) as total FROM user_task_summaries WHERE user_id = ?', 
+                [user_id], 
+                (err, countRow) => {
+                    if (err) {
+                        return res.status(500).json({ success: false, error: err.message });
+                    }
+
+                    // 获取工作时间
+                    const summaryDates = summaryRows.map(row => row.summary_date).join("','");
+                    const timeQuery = summaryDates ? 
+                        `SELECT work_date, total_time FROM user_work_times WHERE user_id = ? AND work_date IN ('${summaryDates}') ORDER BY work_date DESC` :
+                        'SELECT work_date, total_time FROM user_work_times WHERE user_id = ? AND 1=0';
                     
-                    // 将摘要按日期分组
-                    const summariesByDate = {};
-                    summaryRows.forEach(row => {
-                        const date = row.summary_date;
-                        summariesByDate[date] = JSON.parse(row.summary_data);
-                    });
-                    
-                    res.json({ 
-                        success: true, 
-                        summariesByDate,
-                        timesByDate
+                    db.all(timeQuery, [user_id], (err, timeRows) => {
+                        if (err) {
+                            return res.status(500).json({ success: false, error: err.message });
+                        }
+
+                        // 将工作时间转换为以日期为键的对象
+                        const timesByDate = {};
+                        timeRows.forEach(row => {
+                            timesByDate[row.work_date] = row.total_time;
+                        });
+                        
+                        // 将摘要按日期分组
+                        const summariesByDate = {};
+                        summaryRows.forEach(row => {
+                            const date = row.summary_date;
+                            summariesByDate[date] = JSON.parse(row.summary_data);
+                        });
+                        
+                        res.json({ 
+                            success: true, 
+                            summariesByDate,
+                            timesByDate,
+                            pagination: {
+                                total: countRow.total,
+                                page: parseInt(page),
+                                pageSize,
+                                hasMore: countRow.total > page * pageSize
+                            }
+                        });
                     });
                 });
         });
@@ -360,9 +395,9 @@ app.post('/api/note/:user_id/:date', (req, res) => {
             db.run('UPDATE user_notes SET note_content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [note, row.id]);
         } else {
             db.run('INSERT INTO user_notes (user_id, note_date, note_content) VALUES (?, ?, ?)', [user_id, date, note]);
-        }
-        res.json({ success: true });
-    });
+            }
+            res.json({ success: true });
+        });
 });
 
 // 启动服务器
