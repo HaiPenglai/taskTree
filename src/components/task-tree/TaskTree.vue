@@ -209,7 +209,6 @@ export default {
       if (this.loadError != null) return;
       
       this.calculateTotalWorkTime();
-      console.log(this.totalWorkTime);
       
       try {
         await this.$axios.post(

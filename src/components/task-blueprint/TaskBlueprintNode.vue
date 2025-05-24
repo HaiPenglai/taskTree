@@ -133,6 +133,13 @@ export default {
     },
     toggleComplete() {
       this.node.completed = this.node.completed === 1 ? 0 : 1;
+      if (!this.node.parentId) {
+        this.$emit('update-root', {
+          id: this.node.id,
+          completed: this.node.completed,
+          text: this.node.text
+        });
+      }
     },
     hideNode() {
       this.node.hidden = 1 - this.node.hidden;
@@ -140,6 +147,19 @@ export default {
     toggleComment() {
       this.showComment = !this.showComment;
     },
+  },
+  watch: {
+    'node.text': {
+      handler(newVal) {
+        if (!this.node.parentId) {
+          this.$emit('update-root', {
+            id: this.node.id,
+            completed: this.node.completed,
+            text: newVal
+          });
+        }
+      }
+    }
   },
 };
 </script>

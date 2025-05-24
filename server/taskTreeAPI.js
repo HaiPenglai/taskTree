@@ -9,7 +9,7 @@ app.use(express.json());
 const cors = require('cors');
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type']
 }));
 
@@ -250,47 +250,109 @@ app.get('/api/task-summary/:user_id', (req, res) => {
         });
 });
 
-// 获取用户蓝图
-app.get('/api/task-blueprint/:user_id', (req, res) => {
+// 获取用户所有蓝图根节点
+app.get('/api/task-blueprint-roots/:user_id', (req, res) => {
     const { user_id } = req.params;
-    logRequest('GET', 'Blueprint', { user: user_id });
-    db.get('SELECT blueprint_data FROM user_task_blueprints WHERE user_id = ?', [user_id], (_, row) => {
-        if (row) {
-            res.json({ success: true, nodes: JSON.parse(row.blueprint_data) });
-        } else {
-            const defaultBlueprint = [{
-                id: Date.now(),
-                parentId: null,
-                text: "蓝图根节点",
-                comment: "",
-                completed: 0,
-                timeStamp: new Date().toISOString().split('T')[0],
-                hidden: 0,
-                children: []
-            }];
-            db.run('INSERT INTO user_task_blueprints (user_id, blueprint_data) VALUES (?, ?)',
-                [user_id, JSON.stringify(defaultBlueprint)]);
-            res.json({ success: true, nodes: defaultBlueprint });
-        }
-    });
+    logRequest('GET', 'Blueprint Roots', { user: user_id });
+    
+    db.all('SELECT blueprint_root FROM user_task_blueprints WHERE user_id = ? ORDER BY created_at DESC', 
+        [user_id], (err, rows) => {
+            if (err) {
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            const roots = rows.map(row => JSON.parse(row.blueprint_root));
+            res.json({ success: true, roots });
+        });
 });
 
-// 保存用户蓝图
+// 获取特定蓝图树
+app.get('/api/task-blueprint-tree/:user_id/:root_id', (req, res) => {
+    const { user_id, root_id } = req.params;
+    logRequest('GET', 'Blueprint Tree', { user: user_id, root: root_id });
+    
+    // 使用CAST将root_id转换为TEXT进行比较，或者使用LIKE进行模糊匹配
+    db.get('SELECT blueprint_tree FROM user_task_blueprints WHERE user_id = ? AND CAST(root_id AS TEXT) LIKE ?', 
+        [user_id, root_id + '%'], (err, row) => {
+            if (err) {
+                console.error('Error fetching blueprint tree:', err);
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            if (!row) {
+                console.error('Blueprint tree not found for root_id:', root_id);
+                return res.status(404).json({ success: false, message: '未找到对应的蓝图树' });
+            }
+            
+            const nodes = JSON.parse(row.blueprint_tree);
+            res.json({ success: true, nodes });
+        });
+});
+
+// 新建或更新蓝图树
 app.post('/api/task-blueprint/:user_id', (req, res) => {
     const { user_id } = req.params;
-    logRequest('POST', 'Blueprint', { user: user_id });
-    const { nodes } = req.body;
+    const { nodes, root_id } = req.body;
+    logRequest('POST', 'Blueprint', { user: user_id, root: root_id });
     
-    db.get('SELECT id FROM user_task_blueprints WHERE user_id = ?', [user_id], (_, row) => {
-        if (row) {
-            db.run('UPDATE user_task_blueprints SET blueprint_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-                [JSON.stringify(nodes), row.id]);
-        } else {
-            db.run('INSERT INTO user_task_blueprints (user_id, blueprint_data) VALUES (?, ?)',
-                [user_id, JSON.stringify(nodes)]);
-        }
-        res.json({ success: true });
-    });
+    if (!nodes || !nodes.length || !root_id) {
+        return res.status(400).json({ success: false, message: '无效的请求数据' });
+    }
+    
+    // 提取根节点信息（不包含children）
+    const rootNode = { ...nodes[0] };
+    delete rootNode.children;
+    
+    db.get('SELECT id FROM user_task_blueprints WHERE user_id = ? AND root_id = ?', 
+        [user_id, root_id], (err, row) => {
+            if (err) {
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            const query = row ? 
+                'UPDATE user_task_blueprints SET blueprint_root = ?, blueprint_tree = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND root_id = ?' :
+                'INSERT INTO user_task_blueprints (user_id, root_id, blueprint_root, blueprint_tree) VALUES (?, ?, ?, ?)';
+            
+            const params = row ?
+                [JSON.stringify(rootNode), JSON.stringify(nodes), user_id, root_id] :
+                [user_id, root_id, JSON.stringify(rootNode), JSON.stringify(nodes)];
+            
+            db.run(query, params, (err) => {
+                if (err) {
+                    return res.status(500).json({ success: false, error: err.message });
+                }
+                res.json({ success: true });
+            });
+        });
+});
+
+// 删除蓝图树
+app.delete('/api/task-blueprint/:user_id/:root_id', (req, res) => {
+    const { user_id, root_id } = req.params;
+    logRequest('DELETE', 'Blueprint', { user: user_id, root: root_id });
+    
+    db.run('DELETE FROM user_task_blueprints WHERE user_id = ? AND CAST(root_id AS TEXT) LIKE ?',
+        [user_id, root_id + '%'], (err) => {
+            if (err) {
+                console.error('Error deleting blueprint tree:', err);
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            // 检查是否真的删除了记录
+            db.get('SELECT changes() as affected', [], (err, row) => {
+                if (err) {
+                    console.error('Error checking affected rows:', err);
+                    return res.status(500).json({ success: false, error: err.message });
+                }
+                
+                if (row.affected === 0) {
+                    console.warn('No blueprint tree was deleted for root_id:', root_id);
+                    return res.status(404).json({ success: false, message: '未找到对应的蓝图树' });
+                }
+                
+                res.json({ success: true });
+            });
+        });
 });
 
 // 获取用户工作时间

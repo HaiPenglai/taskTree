@@ -2,12 +2,12 @@
 <template>
   <button
     class="task-blueprint-navbar-node"
-    @click.stop="$emit('locate-node', node.id)"
-    :class="{ active: isActive, 'root-node': isRootNode }"
+    @click.stop="handleClick"
+    :class="{ active: isActive }"
   >
     <div 
       class="time-badge"
-      :class="{ 'root-badge': isRootNode }"
+      :class="{ active: isActive }"
     >
       {{ formattedTime }}
       <span class="time-number" v-if="index">{{ index }}</span>
@@ -36,9 +36,11 @@ export default {
   computed: {
     formattedTime() {
       return this.node.timeStamp.split(' ')[1] || 'OK'; // 只显示时间部分
-    },
-    isRootNode() {
-      return !this.node.parentId;
+    }
+  },
+  methods: {
+    handleClick() {
+      this.$emit('click-node', this.node.id);
     }
   }
 };
@@ -63,7 +65,7 @@ export default {
   text-overflow: ellipsis;
 }
 
-.task-blueprint-navbar-node.root-node {
+.task-blueprint-navbar-node.active {
   background-color: #f282c2;
   color: #fff;
   font-weight: bold;
@@ -84,7 +86,7 @@ export default {
   border-radius: 0 4px 4px 0;
 }
 
-.root-badge {
+.time-badge.active {
   background: #a33581;
 }
 
@@ -92,7 +94,7 @@ export default {
   background-color: #f2b2db;
 }
 
-.task-blueprint-navbar-node.root-node:hover {
+.task-blueprint-navbar-node.active:hover {
   background-color: #e56fb4;
 }
 
@@ -100,7 +102,7 @@ export default {
   background-color: #a33581;
 }
 
-.task-blueprint-navbar-node:hover .root-badge {
+.task-blueprint-navbar-node.active:hover .time-badge {
   background-color: #8e2971;
 }
 

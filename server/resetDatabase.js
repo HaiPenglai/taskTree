@@ -90,10 +90,13 @@ async function resetDatabase(forceReset = false) {
       CREATE TABLE IF NOT EXISTS user_task_blueprints (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
-        blueprint_data TEXT NOT NULL,
+        root_id TEXT NOT NULL,
+        blueprint_root TEXT NOT NULL,
+        blueprint_tree TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id)
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, root_id)
       )
     `);
 

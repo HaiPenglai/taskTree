@@ -2,7 +2,7 @@
 <template>
   <button
     class="task-blueprint-sidebar-node"
-    @click.stop="$emit('locate-node', node.id)"
+    @click.stop="handleClick"
     :class="{ 
       active: isActive, 
       'snoozed': isSnoozed,
@@ -50,6 +50,9 @@ export default {
   methods: {
     toggleSnooze() {
       this.isSnoozed = !this.isSnoozed;
+    },
+    handleClick() {
+      this.$emit('click-node', this.node.id);
     }
   }
 };
@@ -74,7 +77,7 @@ export default {
   text-overflow: ellipsis;
 }
 
-.task-blueprint-sidebar-node.root-node {
+.task-blueprint-sidebar-node.active {
   background-color: #b294ff;
   color: #fff;
   font-weight: bold;
@@ -100,23 +103,27 @@ export default {
   cursor: pointer;
 }
 
-.root-badge {
+.task-blueprint-sidebar-node.active .index-badge {
   background: #7b54ff;
 }
 
 .task-blueprint-sidebar-node:hover {
-  background-color: #d9bfff;
+  background-color: #d4b8ff;
 }
 
-.task-blueprint-sidebar-node.root-node:hover {
+.task-blueprint-sidebar-node.active:hover {
   background-color: #9b78ff;
 }
 
 .task-blueprint-sidebar-node:hover .index-badge {
-  background-color: #a173fc;
+  background-color: #8e65ff;
 }
 
-.task-blueprint-sidebar-node:hover .root-badge {
+.task-blueprint-sidebar-node.active:hover .index-badge {
   background-color: #6842e6;
+}
+
+.root-badge {
+  background: #7b54ff;
 }
 </style>
