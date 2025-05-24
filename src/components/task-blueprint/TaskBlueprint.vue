@@ -523,7 +523,7 @@ export default {
   bottom: 0px;
   width: 29px;
   height: 29px;
-  background-color: #4caf50;
+  background-color: #5c95d6;
   color: white;
   border: none;
   border-radius: 4px;
@@ -536,7 +536,7 @@ export default {
 }
 
 .add-root-button:hover {
-  background-color: #3e8e41;
+  background-color: #3a76ba;
 }
 </style>
 
