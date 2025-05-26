@@ -71,7 +71,7 @@ methods: {
 <style scoped>
 .comment-node {
 margin-left: 10px;
-width: 350px;
+width: 450px;
 flex-grow: 1;
 }
 

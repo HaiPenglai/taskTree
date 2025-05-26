@@ -457,7 +457,7 @@ export default {
 }
 
 .sidebar-container {
-  width: 250px;
+  width: 200px;
   background-color: white;
   border-right: 2px solid #3481ce;
   overflow-y: auto;
@@ -473,7 +473,7 @@ export default {
 }
 
 .navbar-container {
-  width: 250px;
+  width: 200px;
   background-color: white;
   border-left: 2px solid #4db6ac; /* 青色边框 */
   overflow-y: auto;

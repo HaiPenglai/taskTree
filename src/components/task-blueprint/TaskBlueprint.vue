@@ -480,7 +480,7 @@ export default {
 }
 
 .sidebar-container {
-  width: 250px;
+  width: 200px;
   background-color: white;
   border-right: 2px solid #9c64ff;
   overflow-y: auto;
@@ -497,7 +497,7 @@ export default {
 }
 
 .navbar-container {
-  width: 250px;
+  width: 200px;
   background-color: white;
   border-left: 2px solid #f46f99;
   overflow-y: auto;
