@@ -23,7 +23,7 @@ async function initializeServer() {
         db = await resetDatabase(false);
         
         // 启动服务器
-        const PORT = process.env.PORT || 3002;
+        const PORT = process.env.PORT || 3003;
         app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}, accessible from all interfaces`));
     } catch (error) {
         console.error('Server initialization failed:', error);
@@ -213,8 +213,8 @@ app.get('/api/task-summary/:user_id', (req, res) => {
                     // 获取工作时间
                     const summaryDates = summaryRows.map(row => row.summary_date).join("','");
                     const timeQuery = summaryDates ? 
-                        `SELECT work_date, total_time FROM user_work_times WHERE user_id = ? AND work_date IN ('${summaryDates}') ORDER BY work_date DESC` :
-                        'SELECT work_date, total_time FROM user_work_times WHERE user_id = ? AND 1=0';
+                        `SELECT work_date, total_time, total_chars FROM user_work_count WHERE user_id = ? AND work_date IN ('${summaryDates}') ORDER BY work_date DESC` :
+                        'SELECT work_date, total_time, total_chars FROM user_work_count WHERE user_id = ? AND 1=0';
                     
                     db.all(timeQuery, [user_id], (err, timeRows) => {
                         if (err) {
@@ -224,7 +224,10 @@ app.get('/api/task-summary/:user_id', (req, res) => {
                         // 将工作时间转换为以日期为键的对象
                         const timesByDate = {};
                         timeRows.forEach(row => {
-                            timesByDate[row.work_date] = row.total_time;
+                            timesByDate[row.work_date] = {
+                                total_time: row.total_time,
+                                totalChars: row.total_chars
+                            };
                         });
                         
                         // 将摘要按日期分组
@@ -360,12 +363,12 @@ app.get('/api/task-time/:user_id/:date', (req, res) => {
     const { user_id, date } = req.params;
     logRequest('GET', 'WorkTime', { user: user_id, date });
     
-    db.get('SELECT total_time FROM user_work_times WHERE user_id = ? AND work_date = ?', 
+    db.get('SELECT total_time, total_chars FROM user_work_count WHERE user_id = ? AND work_date = ?', 
         [user_id, date], (err, row) => {
             if (row) {
-                res.json({ success: true, totalTime: row.total_time });
+                res.json({ success: true, totalTime: row.total_time, totalChars: row.total_chars });
             } else {
-                res.json({ success: true, totalTime: 0 });
+                res.json({ success: true, totalTime: 0, totalChars: 0 });
             }
         });
 });
@@ -373,21 +376,21 @@ app.get('/api/task-time/:user_id/:date', (req, res) => {
 // 保存用户工作时间
 app.post('/api/task-time/:user_id/:date', (req, res) => {
     const { user_id, date } = req.params;
-    const { totalTime } = req.body;
-    logRequest('POST', 'WorkTime', { user: user_id, date, time: totalTime });
+    const { totalTime, totalChars } = req.body;
+    logRequest('POST', 'WorkTime', { user: user_id, date, time: totalTime, chars: totalChars });
     
     if (totalTime === undefined) {
         return res.status(400).json({ success: false, message: '总时间不能为空' });
     }
     
-    db.get('SELECT id FROM user_work_times WHERE user_id = ? AND work_date = ?', 
+    db.get('SELECT id FROM user_work_count WHERE user_id = ? AND work_date = ?', 
         [user_id, date], (err, row) => {
             if (row) {
-                db.run('UPDATE user_work_times SET total_time = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-                    [totalTime, row.id]);
+                db.run('UPDATE user_work_count SET total_time = ?, total_chars = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                    [totalTime, totalChars || 0, row.id]);
             } else {
-                db.run('INSERT INTO user_work_times (user_id, work_date, total_time) VALUES (?, ?, ?)',
-                    [user_id, date, totalTime]);
+                db.run('INSERT INTO user_work_count (user_id, work_date, total_time, total_chars) VALUES (?, ?, ?, ?)',
+                    [user_id, date, totalTime, totalChars || 0]);
             }
             res.json({ success: true });
         });

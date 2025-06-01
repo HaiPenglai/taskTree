@@ -22,7 +22,8 @@
         >
           <div class="date-header">
             {{ date }} 
-            <span v-if="timesByDate[date]">{{ formatTotalTime(timesByDate[date]) }}</span>
+            <span v-if="timesByDate[date]">{{ formatTotalTime(timesByDate[date].total_time) }}</span>
+            <span v-if="timesByDate[date]" class="char-count">({{ timesByDate[date].totalChars || 0 }})</span>
           </div>
           <div class="tasks-row">
             <TaskSummaryNode 
@@ -208,6 +209,11 @@ export default {
 .date-header span {
   margin-left: 15px;
   font-size: 16px;
+}
+
+.date-header .char-count {
+  color: #4db6ac;
+  font-weight: normal;
 }
 
 .tasks-row {

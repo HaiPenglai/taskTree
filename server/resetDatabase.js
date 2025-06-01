@@ -102,11 +102,12 @@ async function resetDatabase(forceReset = false) {
 
     // 创建用户工作时间表
     await runQuery(db, `
-      CREATE TABLE IF NOT EXISTS user_work_times (
+      CREATE TABLE IF NOT EXISTS user_work_count (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         work_date TEXT NOT NULL,
         total_time INTEGER DEFAULT 0,
+        total_chars INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(user_id, work_date)

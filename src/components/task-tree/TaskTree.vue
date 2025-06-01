@@ -50,6 +50,7 @@
   <div class="date-stats-container">
     <input type="date" v-model="selectedDate" class="date-input" />
     <div class="total-time">{{ formattedTotalTime }}</div>
+    <div class="total-chars">{{ formattedCharsWithCPM }}</div>
     <button class="add-root-button" @click="addRootNode">+</button>
     <button class="add-rest-button" @click="showRestList">休</button>
     <button class="add-calendar-button" @click="showCalendar">日</button>
@@ -104,6 +105,10 @@ export default {
       saveTimer: null,
       selectedDate: today,
       totalWorkTime: 0,
+      totalChars: 0,
+      previousChars: 0,
+      charChangeQueue: [],
+      isInitialLoad: true,  // Add flag for initial load
       restListVisible: false,
       restListPosition: { x: 0, y: 0 },
       calendarVisible: false,
@@ -136,18 +141,32 @@ export default {
       const minutes = Math.floor((this.totalWorkTime % 3600) / 60);
       const seconds = Math.floor(this.totalWorkTime % 60);
       return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    },
+    formattedCharsWithCPM() {
+      if (this.charChangeQueue.length === 0) {
+        return `${this.totalChars}`;
+      }
+      
+      const totalIncrease = this.charChangeQueue.reduce((sum, val) => sum + val, 0);
+      const minutes = this.charChangeQueue.length * (5 / 60); // Convert seconds to minutes
+      const cpm = Math.round(totalIncrease / minutes);
+      
+      return `${this.totalChars}${cpm > 0 ? ` (cpm:${cpm})` : ''}`;
     }
   },
   watch: {
     selectedDate(newDate, oldDate) {
       if (newDate !== oldDate) {
+        this.isInitialLoad = true; // Reset initial load flag when changing dates
         this.loadTaskTree();
         this.calendarVisible = false;  // 切换日期时关闭日历
+        this.charChangeQueue = []; // Reset typing speed tracking
       }
     },
   },
   async created() {
     await this.loadTaskTree();
+    this.previousChars = this.totalChars;
     this.saveTimer = setInterval(() => {
       this.saveTaskTree();
     }, 5000);
@@ -198,6 +217,16 @@ export default {
         this.nodes = response.data.nodes;
         this.buildNodeMap();
         this.calculateTotalWorkTime();
+        await this.calculateTotalChars();
+        
+        // Load total time and chars
+        const timeResponse = await this.$axios.get(
+          `/api/task-time/${this.userId}/${this.selectedDate}`
+        );
+        if (timeResponse.data.success) {
+          this.totalWorkTime = timeResponse.data.totalTime;
+          this.totalChars = timeResponse.data.totalChars;
+        }
         
         this.loadError = null;
       } catch (error) {
@@ -209,6 +238,7 @@ export default {
       if (this.loadError != null) return;
       
       this.calculateTotalWorkTime();
+      await this.calculateTotalChars();
       
       try {
         await this.$axios.post(
@@ -221,7 +251,8 @@ export default {
         await this.$axios.post(
           `/api/task-time/${this.userId}/${this.selectedDate}`,
           {
-            totalTime: this.totalWorkTime
+            totalTime: this.totalWorkTime,
+            totalChars: this.totalChars
           }
         );
         
@@ -272,6 +303,56 @@ export default {
       
       // 将毫秒转换为秒
       this.totalWorkTime = Math.floor(totalTimeMs / 1000);
+    },
+    async calculateTotalChars() {
+      const calculateNodeChars = (node) => {
+        let chars = (node.text || '').length + (node.comment || '').length;
+        if (node.children && node.children.length > 0) {
+          chars += node.children.reduce((sum, child) => sum + calculateNodeChars(child), 0);
+        }
+        return chars;
+      };
+      
+      // Calculate chars from task tree
+      const taskChars = this.nodes.reduce((sum, node) => sum + calculateNodeChars(node), 0);
+      
+      // Get notebook chars
+      try {
+        const noteResponse = await this.$axios.get(`/api/note/${this.userId}/${this.selectedDate}`);
+        if (noteResponse.data.success) {
+          const noteChars = (noteResponse.data.note || '').length;
+          const newTotalChars = taskChars + noteChars;
+          
+          // Calculate character increase only if not initial load
+          if (!this.isInitialLoad) {
+            const charIncrease = newTotalChars - this.previousChars;
+            if (charIncrease > 0) {
+              this.charChangeQueue.push(charIncrease);
+              if (this.charChangeQueue.length > 12) {
+                this.charChangeQueue.shift(); // Remove oldest entry if queue is too long
+              }
+            }
+          } else {
+            this.isInitialLoad = false; // Reset initial load flag after first calculation
+          }
+          
+          this.previousChars = newTotalChars;
+          this.totalChars = newTotalChars;
+        } else {
+          this.totalChars = taskChars;
+          this.previousChars = taskChars;
+          if (this.isInitialLoad) {
+            this.isInitialLoad = false;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading note chars:', error);
+        this.totalChars = taskChars;
+        this.previousChars = taskChars;
+        if (this.isInitialLoad) {
+          this.isInitialLoad = false;
+        }
+      }
     },
     createDefaultTree() {
       const rootId = Date.now();
@@ -511,6 +592,19 @@ export default {
   border-radius: 4px;
   font-weight: bold;
   font-size: 16px;
+}
+
+.total-chars {
+  margin-left: 10px;
+  padding: 0px 5px;
+  background-color: #76b2f6;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
+  height: 29px;
+  display: flex;
+  align-items: center;
 }
 
 .add-root-button {
